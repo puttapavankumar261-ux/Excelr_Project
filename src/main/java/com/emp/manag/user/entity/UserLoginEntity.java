@@ -20,7 +20,7 @@ import lombok.Data;
 @Data
 @Table(name = "user_login")
 public class UserLoginEntity {
-	
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_login_id", nullable = false, updatable = false)
@@ -28,7 +28,7 @@ public class UserLoginEntity {
 
 	@Column(name = "username", nullable = false, unique = true)
 	private String username;
-	
+
 	@Column(name = "passwordhash", nullable = false)
 	private String passwordhash;
 
@@ -40,17 +40,28 @@ public class UserLoginEntity {
 
 	@Column(name = "passwordresttokenexpiry")
 	private String passwordresttokenexpiry;
-	
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-        
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
-	
+
+	// e.g Admin/User, SUPER_ADMIN, DEPT_MANAGER, TEAM_LEAD, EMPLOYEE
+	@Column(name = "role", nullable = false)
+	private String role;
+
+	@CreationTimestamp
+	@Column(name = "last_Login", updatable = false)
+	private LocalDateTime lastLogin;
+
+	@Column(name = "status", nullable = false)
+	private String status;
+
+	@OneToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	private UserEntity user;
+
+	@CreationTimestamp
+	@Column(name = "created_at", nullable = false, updatable = false)
+	private LocalDateTime createdAt;
+
+	@UpdateTimestamp
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
+
 }

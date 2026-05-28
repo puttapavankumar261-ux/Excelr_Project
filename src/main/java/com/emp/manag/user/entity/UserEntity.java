@@ -17,6 +17,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -30,12 +31,27 @@ public class UserEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id", nullable = false, updatable = false)
 	private Integer userId;
-	
-	
+		
 	@JsonIgnore
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<EmpEntity> employee; // Association with EmpEntity, can be null for non-employee users
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<UserEducationEntity> userEducation;
+	
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<UserExperienceEntity> userExperience;
 
+	@JsonIgnore
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<UserAssessmentEntity> userAssessment; // One-to-one relationship with UserAssessmentEntity
+	
+	@JsonIgnore
+	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	private List<UserLoginEntity> userLogin; // One-to-many relationship with UserLoginEntity
+	
 	@Column(name = "first_name", nullable = false)
 	private String firstName;
 
@@ -92,6 +108,9 @@ public class UserEntity {
 	
 	@Column(name = "marital_status")
 	private String maritalStatus;
+	
+	@Column(name = "user_status")
+	private String userStatus; // ACTIVE, INACTIVE, SUSPENDED, etc.
 		
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false)
