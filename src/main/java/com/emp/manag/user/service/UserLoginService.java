@@ -37,10 +37,7 @@ public class UserLoginService {
 
 		UserEntity user = userRepo.findById(userId)
 				.orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-
-		UserLoginEntity Login = loginRepo.findById(userId)
-				.orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-
+		
 		login.setUser(user);
 
 		if (login.getStatus() == null || login.getStatus().trim().isEmpty()) {
