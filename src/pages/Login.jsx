@@ -1,75 +1,70 @@
-// src/pages/Login.jsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-    const [username, setUsername] = useState("");
-    const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("http://localhost:8080/login", {
+        username,
+        password,
+      });
 
-    const handleLogin = async () => {
+      console.log("Login Response:", response.data);
 
-        try {
+      localStorage.setItem("user", JSON.stringify(response.data));
 
-            const response = await axios.get(
-                `http://localhost:8080/getloginbyusername/${username}`
-            );
+      const role = response.data.role;
 
-            if(response.data){
+      if (role === "ADMIN" || role === "HR" || role === "MANAGER") {
+        navigate("/admin/dashboard");
+      } else if (role === "EMPLOYEE") {
+        navigate("/employee/dashboard");
+      } else {
+        setError("Invalid User Role");
+      }
+    } catch (err) {
+      console.error(err);
 
-                localStorage.setItem(
-                    "user",
-                    JSON.stringify(response.data)
-                );
+      setError("Invalid Username or Password");
+    }
+  };
 
-                navigate("/dashboard");
-            }
+  return (
+    <div className="container mt-5">
+      <div className="card p-4 shadow">
+        <h2 className="text-center mb-4">HRMS Login</h2>
 
-        } catch(err) {
-            setError("Invalid Username");
-        }
-    };
+        <input
+          type="text"
+          className="form-control mb-3"
+          placeholder="Enter Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        />
 
-    return (
-        <div className="container mt-5">
+        <input
+          type="password"
+          className="form-control mb-3"
+          placeholder="Enter Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-            <div className="card p-4 shadow">
+        <button className="btn btn-primary" onClick={handleLogin}>
+          Login
+        </button>
 
-                <h2 className="text-center mb-4">
-                    HRMS Login
-                </h2>
-
-                <input
-                    type="text"
-                    className="form-control mb-3"
-                    placeholder="Enter Username"
-                    value={username}
-                    onChange={(e) =>
-                        setUsername(e.target.value)
-                    }
-                />
-
-                <button
-                    className="btn btn-primary"
-                    onClick={handleLogin}
-                >
-                    Login
-                </button>
-
-                {error && (
-                    <p className="text-danger mt-3">
-                        {error}
-                    </p>
-                )}
-
-            </div>
-
-        </div>
-    );
+        {error && <p className="text-danger mt-3">{error}</p>}
+      </div>
+    </div>
+  );
 }
 
 export default Login;

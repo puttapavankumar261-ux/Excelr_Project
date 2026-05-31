@@ -1,200 +1,235 @@
-/* ================= HOME PAGE ================= */
-
-.home-page {
-  background-color: #f5f7fb;
-  min-height: 100vh;
-  overflow-x: hidden;
-  font-family: "Poppins", sans-serif;
-}
-
-/* ================= NAVBAR ================= */
-
 .custom-navbar {
-  background: #ffffff;
-  padding: 15px 50px;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.08);
+
+    background: white;
+
+    padding: 4px 10px;
+
+    min-height: 45px;
+
+    box-shadow:
+        0 2px 15px rgba(0,0,0,.08);
 }
 
 .logo-img {
-  width: 65px;
-  height: 65px;
-  object-fit: contain;
+
+    width: 60px;
+
+    height: auto;
 }
 
 .logo-title {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 700;
-  color: #2563eb;
+
+    margin: 0;
+
+    font-size: 1.8rem;
+
+    font-weight: 700;
 }
 
 .logo-subtitle {
-  color: #6b7280;
-  font-size: 15px;
+
+    color: #6c757d;
+
+    font-size: .5rem;
 }
 
-/* ================= HERO SECTION ================= */
+/* ================= HERO ================= */
 
 .hero-section {
-  padding: 80px 0;
+
+    min-height: 80vh;
+
+    display: flex;
+
+    align-items: center;
 }
 
 .hero-title {
-  font-size: 70px;
-  font-weight: 800;
-  line-height: 1.2;
-  color: #111827;
+
+    font-size: 3.8rem;
+
+    font-weight: 800;
+
+    line-height: 1.2;
 }
 
 .hero-highlight {
-  color: #2563eb;
+
+    color: #0d6efd;
 }
 
 .hero-description {
-  color: #6b7280;
-  font-size: 24px;
-  line-height: 1.7;
-  margin-top: 30px;
-  margin-bottom: 35px;
-  max-width: 650px;
-}
 
-/* ================= HERO IMAGE ================= */
+    font-size: 1.15rem;
+
+    color: #6c757d;
+
+    margin-top: 20px;
+}
 
 .hero-image {
-  width: 100%;
-  max-width: 650px;
-  animation: floatImage 4s ease-in-out infinite;
+
+    max-width: 100%;
+
+    border-radius: 20px;
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,.15);
 }
-
-/* ================= IMAGE ANIMATION ================= */
-
-@keyframes floatImage {
-
-  0% {
-    transform: translateY(0px);
-  }
-
-  50% {
-    transform: translateY(-15px);
-  }
-
-  100% {
-    transform: translateY(0px);
-  }
-
-}
-
-/* ================= BUTTONS ================= */
-
-.btn-primary {
-  background-color: #2563eb;
-  border: none;
-  padding: 12px 28px;
-  font-size: 18px;
-  border-radius: 10px;
-}
-
-.btn-primary:hover {
-  background-color: #1d4ed8;
-}
-
-.btn-outline-dark,
-.btn-outline-primary {
-  padding: 12px 28px;
-  font-size: 18px;
-  border-radius: 10px;
-}
-
-/* ================= FEATURES SECTION ================= */
-
-.features-section {
-  padding: 80px 0;
-}
-
 .feature-card {
-  border: none;
-  border-radius: 18px;
-  padding: 35px;
-  transition: 0.3s ease;
-  background: #ffffff;
+    transition: .3s ease;
 }
 
 .feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0px 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-10px);
 }
 
-.feature-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: #111827;
+.stats-section {
+    background: #0d6efd;
+    color: white;
+    padding: 60px 0;
 }
 
-.feature-card p {
-  font-size: 17px;
-  line-height: 1.7;
+.stats-section h2 {
+    font-weight: 700;
 }
 
-/* ================= FOOTER ================= */
+.cta-section {
+    background: linear-gradient(
+        135deg,
+        #0d6efd,
+        #3d7eff
+    );
+
+    color: white;
+    padding: 40px 15;
+}
 
 .footer-section {
-  background: #111827;
-  color: white;
-  text-align: center;
-  padding: 25px;
-  margin-top: 70px;
+    background: #212529;
+    color: white;
+    padding: 15px 0;
 }
 
-/* ================= RESPONSIVE ================= */
+/* ================= LOGIN MODAL ================= */
 
-@media screen and (max-width: 992px) {
+.login-overlay {
 
-  .hero-section {
-    text-align: center;
-    padding: 60px 20px;
-  }
+    position: fixed;
 
-  .hero-title {
-    font-size: 50px;
-  }
+    inset: 0;
 
-  .hero-description {
-    font-size: 20px;
-    max-width: 100%;
-  }
+    background: rgba(0,0,0,.55);
 
-  .hero-image {
-    margin-top: 40px;
-    max-width: 500px;
-  }
+    backdrop-filter: blur(8px);
 
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    z-index: 9999;
 }
 
-@media screen and (max-width: 576px) {
+.login-modal {
 
-  .custom-navbar {
-    padding: 15px 20px;
-  }
+    width: 420px;
 
-  .logo-title {
+    max-width: 90%;
+
+    background: white;
+
+    border-radius: 20px;
+
+    padding: 35px;
+
+    position: relative;
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.25);
+
+    animation: popup .3s ease;
+}
+
+@keyframes popup {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(-20px)
+            scale(.95);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+.close-btn {
+
+    position: absolute;
+
+    top: 15px;
+
+    right: 18px;
+
+    border: none;
+
+    background: transparent;
+
     font-size: 24px;
-  }
 
-  .hero-title {
-    font-size: 40px;
-  }
+    cursor: pointer;
 
-  .hero-description {
-    font-size: 18px;
-  }
+    color: #666;
+}
 
-  .btn-primary,
-  .btn-outline-dark,
-  .btn-outline-primary {
-    font-size: 16px;
-    padding: 10px 20px;
-  }
+.close-btn:hover {
 
+    color: #000;
+}
+
+.login-heading {
+
+    color: #0d6efd;
+
+    font-weight: 700;
+}
+
+.login-input {
+
+    height: 50px;
+
+    border-radius: 12px;
+
+    border: 1px solid #ddd;
+}
+
+.login-input:focus {
+
+    border-color: #0d6efd;
+
+    box-shadow:
+        0 0 10px rgba(13,110,253,.2);
+
+    outline: none;
+}
+
+.login-button {
+
+    height: 50px;
+
+    border-radius: 12px;
+
+    font-size: 17px;
+
+    font-weight: 600;
 }
