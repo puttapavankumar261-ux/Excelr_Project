@@ -1,5 +1,6 @@
 package com.emp.manag.employee.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,16 @@ import com.emp.manag.employee.entity.EmpEntity;
 import com.emp.manag.employee.entity.EmpLoginEntity;
 import com.emp.manag.employee.repo.EmpLoginRepo;
 import com.emp.manag.employee.repo.EmpRepo;
+import com.emp.manag.config.dto.LoginRequest;
+import com.emp.manag.config.dto.SessionResponse;
+
+import jakarta.servlet.http.HttpSession;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
 public class EmpLoginService {
+
+	private static final int SESSION_TIMEOUT_SECONDS = 30 * 60;
 
 	@Autowired
 	private EmpLoginRepo loginRepo;
@@ -117,6 +124,55 @@ public class EmpLoginService {
 		return "All login records deleted successfully";
 	}
 
+	public SessionResponse login(LoginRequest request, HttpSession session) {
+		if (request == null || request.getUsername() == null || request.getUsername().trim().isEmpty()) {
+			throw new RuntimeException("Username is required");
+		}
+		if (request.getPassword() == null || request.getPassword().trim().isEmpty()) {
+			throw new RuntimeException("Password is required");
+		}
+
+		EmpLoginEntity login = loginRepo.findByUsername(request.getUsername().trim())
+				.orElseThrow(() -> new RuntimeException("Invalid username or password"));
+
+		if (!"ACTIVE".equalsIgnoreCase(login.getStatus())) {
+			throw new RuntimeException("Employee login is not active");
+		}
+		if (!matchesPassword(request.getPassword(), login.getPasswordHash())) {
+			throw new RuntimeException("Invalid username or password");
+		}
+
+		LocalDateTime loginAt = LocalDateTime.now();
+		login.setLastLogin(loginAt);
+		loginRepo.save(login);
+
+		session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
+		session.setAttribute("principalType", "EMPLOYEE");
+		session.setAttribute("employeeLoginId", login.getLoginid());
+		session.setAttribute("employeeId", login.getEmployee().getEmployeeid());
+		session.setAttribute("username", login.getUsername());
+		session.setAttribute("role", login.getRole());
+		session.setAttribute("loginAt", loginAt);
+
+		return buildSessionResponse(session, true, "Employee login successful");
+	}
+
+	public SessionResponse getSession(HttpSession session) {
+		if (session == null || session.getAttribute("employeeLoginId") == null) {
+			return new SessionResponse(null, "EMPLOYEE", null, null, null, null, null, false,
+					"No active employee session");
+		}
+		return buildSessionResponse(session, true, "Employee session is active");
+	}
+
+	public SessionResponse logout(HttpSession session) {
+		SessionResponse response = getSession(session);
+		session.invalidate();
+		response.setAuthenticated(false);
+		response.setMessage("Employee logged out successfully");
+		return response;
+	}
+
 	private void validateLogin(EmpLoginEntity login) {
 
 		if (login == null) {
@@ -138,5 +194,17 @@ public class EmpLoginService {
 		if (login.getRole() == null || login.getRole().trim().isEmpty()) {
 			throw new RuntimeException("Login role is required");
 		}
+	}
+
+	private boolean matchesPassword(String rawPassword, String storedPasswordHash) {
+		return storedPasswordHash != null && storedPasswordHash.equals(rawPassword);
+	}
+
+	private SessionResponse buildSessionResponse(HttpSession session, boolean authenticated, String message) {
+		LocalDateTime loginAt = (LocalDateTime) session.getAttribute("loginAt");
+		LocalDateTime expiresAt = loginAt == null ? null : loginAt.plusSeconds(session.getMaxInactiveInterval());
+		return new SessionResponse(session.getId(), "EMPLOYEE", (Integer) session.getAttribute("employeeId"),
+				(String) session.getAttribute("username"), (String) session.getAttribute("role"), loginAt, expiresAt,
+				authenticated, message);
 	}
 }

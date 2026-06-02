@@ -25,7 +25,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "leave")
+@Table(name = "employee_leave")
 public class LeaveEntity {
 	
 	@Id

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emp.manag.user.entity.UserAssessmentEntity;
 import com.emp.manag.user.service.UserAssessmentService;
+import com.emp.manag.config.dto.AssessmentSessionResponse;
 
 @RestController
 @RequestMapping("/api/employee-management")
@@ -23,8 +24,8 @@ public class UserAssessmentController {
 	public UserAssessmentService userassessmentService;
 	
 	@PostMapping("/saveuserassessment")
-	public String saveUserAssessment(@RequestBody UserAssessmentEntity userAssessment) {
-		return "User Assessment saved successfully.";
+	public UserAssessmentEntity saveUserAssessment(@RequestBody UserAssessmentEntity userAssessment) {
+		return userassessmentService.saveUserAssessment(userAssessment);
 	}
 	
 	@PutMapping("/updateuserassessment/{userAssessmentId}")
@@ -52,6 +53,22 @@ public class UserAssessmentController {
 	public String deleteAllUserAssessments() {
 		userassessmentService.deleteAllUserAssessments();
 		return "All User Assessment records have been deleted.";
+	}
+
+	@PostMapping("/userassessment/{userAssessmentId}/start-session")
+	public AssessmentSessionResponse startAssessmentSession(@PathVariable Integer userAssessmentId) {
+		return userassessmentService.startAssessmentSession(userAssessmentId);
+	}
+
+	@GetMapping("/userassessment/{userAssessmentId}/session")
+	public AssessmentSessionResponse getAssessmentSession(@PathVariable Integer userAssessmentId) {
+		return userassessmentService.refreshAssessmentSession(userAssessmentId);
+	}
+
+	@PostMapping("/userassessment/{userAssessmentId}/submit-session")
+	public AssessmentSessionResponse submitAssessmentSession(@PathVariable Integer userAssessmentId,
+			@RequestBody(required = false) UserAssessmentEntity submission) {
+		return userassessmentService.submitAssessmentSession(userAssessmentId, submission);
 	}
 
 }

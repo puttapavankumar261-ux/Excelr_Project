@@ -1,10 +1,87 @@
 package com.emp.manag.jobboard.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.emp.manag.config.dto.JobApplicationStatusRequest;
+import com.emp.manag.config.dto.JobApplicationSummary;
+import com.emp.manag.jobboard.entity.JobApplicationEntity;
+import com.emp.manag.jobboard.entity.JobApplicationEntity.CandidateStatus;
+import com.emp.manag.jobboard.service.JobApplicationService;
 
 @RestController
 @RequestMapping("/api/employee-management")
 public class JobApplicationController {
+
+	@Autowired
+	private JobApplicationService jobApplicationService;
+
+	@PostMapping("/job-applications")
+	public JobApplicationEntity saveApplication(@RequestBody JobApplicationEntity application) {
+		return jobApplicationService.save(application);
+	}
+
+	@PutMapping("/job-applications/{applicationId}")
+	public String updateApplication(@PathVariable Integer applicationId, @RequestBody JobApplicationEntity application) {
+		return jobApplicationService.updateApplication(applicationId, application);
+	}
+
+	@PutMapping("/job-applications/{applicationId}/status")
+	public String updateApplicationStatus(@PathVariable Integer applicationId,
+			@RequestBody JobApplicationStatusRequest request) {
+		if (request == null) {
+			throw new RuntimeException("Application status request is required");
+		}
+		return jobApplicationService.updateApplicationStatus(applicationId, request.getStatus());
+	}
+
+	@GetMapping("/job-applications/{applicationId}")
+	public JobApplicationEntity getApplicationById(@PathVariable Integer applicationId) {
+		return jobApplicationService.getApplicationById(applicationId);
+	}
+
+	@GetMapping("/job-applications")
+	public List<JobApplicationEntity> getAllApplications() {
+		return jobApplicationService.getAllApplications();
+	}
+
+	@GetMapping("/job-applications/user/{userId}")
+	public List<JobApplicationEntity> getApplicationsByUser(@PathVariable Integer userId) {
+		return jobApplicationService.getApplicationsByUser(userId);
+	}
+
+	@GetMapping("/job-applications/job/{jobId}")
+	public List<JobApplicationEntity> getApplicationsByJob(@PathVariable Integer jobId) {
+		return jobApplicationService.getApplicationsByJob(jobId);
+	}
+
+	@GetMapping("/job-applications/status/{status}")
+	public List<JobApplicationEntity> getApplicationsByStatus(@PathVariable CandidateStatus status) {
+		return jobApplicationService.getApplicationsByStatus(status);
+	}
+
+	@GetMapping("/job-applications/summary")
+	public JobApplicationSummary getApplicationSummary() {
+		return jobApplicationService.getApplicationSummary();
+	}
+
+	@DeleteMapping("/job-applications/{applicationId}")
+	public String deleteApplication(@PathVariable Integer applicationId) {
+		return jobApplicationService.deleteApplication(applicationId);
+	}
+
+	@DeleteMapping("/job-applications")
+	public String deleteAllApplications() {
+		return jobApplicationService.deleteAllApplications();
+	}
 
 }

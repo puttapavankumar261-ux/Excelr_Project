@@ -111,7 +111,7 @@ public class UserService {
 
 	private void attachUserRelations(UserEntity user) {
 		if (user.getEmployee() != null) {
-			user.getEmployee().forEach(emp -> emp.setUser(user));
+			user.getEmployee().setUser(user);
 		}
 	}
 }

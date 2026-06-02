@@ -36,14 +36,14 @@ public class UserEntity {
 		
 	@JsonIgnore
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<EmpEntity> employee; // Association with EmpEntity, can be null for non-employee users
+	private EmpEntity employee; // Association with EmpEntity, can be null for non-employee users
 	
 	@JsonIgnore
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<UserEducationEntity> userEducation;
 	
 	@JsonIgnore
-	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<UserExperienceEntity> userExperience;
 
 	@JsonIgnore
@@ -52,7 +52,7 @@ public class UserEntity {
 	
 	@JsonIgnore
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private List<UserLoginEntity> userLogin; // One-to-many relationship with UserLoginEntity
+	private UserLoginEntity userLogin; // One login record for this user
 	
 	@Column(name = "first_name", nullable = false)
 	private String firstName;

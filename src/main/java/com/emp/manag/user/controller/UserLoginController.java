@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emp.manag.user.entity.UserLoginEntity;
 import com.emp.manag.user.service.UserLoginService;
+import com.emp.manag.config.dto.LoginRequest;
+import com.emp.manag.config.dto.SessionResponse;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/employee-management")
@@ -23,7 +27,7 @@ public class UserLoginController {
 	private UserLoginService loginService;
 
 	@PostMapping("/savelogindetails")
-	public UserLoginEntity saveLoginDetails(UserLoginEntity loginEntity) {
+	public UserLoginEntity saveLoginDetails(@RequestBody UserLoginEntity loginEntity) {
 		return loginService.saveLogin(loginEntity);
 	}
 	
@@ -32,7 +36,7 @@ public class UserLoginController {
 		return loginService.updateLogin(loginId, updatedLogin);
 	}
 	
-	@PostMapping("/deletelogindetails/{loginId}")
+	@DeleteMapping("/deletelogindetails/{loginId}")
 	public String deleteLoginById(@PathVariable Integer loginId) {
 		return loginService.deleteLogin(loginId);
 	}
@@ -50,6 +54,21 @@ public class UserLoginController {
 	@DeleteMapping("/deletealllogindetails")
 	public String deleteAllLoginDetails() {
 		return loginService.deleteAllLogins();
+	}
+
+	@PostMapping("/user/login")
+	public SessionResponse userLogin(@RequestBody LoginRequest request, HttpSession session) {
+		return loginService.login(request, session);
+	}
+
+	@GetMapping("/user/session")
+	public SessionResponse userSession(HttpSession session) {
+		return loginService.getSession(session);
+	}
+
+	@PostMapping("/user/logout")
+	public SessionResponse userLogout(HttpSession session) {
+		return loginService.logout(session);
 	}
 	
 }

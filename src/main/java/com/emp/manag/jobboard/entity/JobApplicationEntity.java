@@ -2,6 +2,9 @@ package com.emp.manag.jobboard.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import com.emp.manag.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
@@ -18,13 +21,13 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name ="job_applications")
+@Table(name = "job_applications")
 public class JobApplicationEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "job_id")
-	private Integer jobId;
+	@Column(name = "job_application_id")
+	private Integer jobApplicationId;
 
 	@ManyToOne
 	@JoinColumn(name = "user_id")
@@ -34,36 +37,39 @@ public class JobApplicationEntity {
 	@JoinColumn(name = "job_id")
 	private JobBoardEntity job;
 
+	@Column(name = "status", nullable = false)
 	@Enumerated(EnumType.STRING)
 	private CandidateStatus status;
-	
+
 	public enum CandidateStatus {
 
-	    REGISTERED,
+		REGISTERED,
 
-	    APPLIED,
+		APPLIED,
 
-	    ASSESSMENT_PENDING,
-	    ASSESSMENT_COMPLETED,
-	    ASSESSMENT_PASSED,
-	    ASSESSMENT_FAILED,
+		ASSESSMENT_PENDING,
+		ASSESSMENT_COMPLETED,
+		ASSESSMENT_PASSED,
+		ASSESSMENT_FAILED,
 
-	    INTERVIEW_SCHEDULED,
-	    INTERVIEW_SELECTED,
-	    INTERVIEW_REJECTED,
+		INTERVIEW_SCHEDULED,
+		INTERVIEW_SELECTED,
+		INTERVIEW_REJECTED,
 
-	    OFFER_RELEASED,
-	    OFFER_ACCEPTED,
+		OFFER_RELEASED,
+		OFFER_ACCEPTED,
 
-	    ONBOARDED
+		ONBOARDED
 	}
 
 	@Column(name = "applied_date")
 	private LocalDateTime appliedDate;
-	
+
+	@CreationTimestamp
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
-	
+
+	@UpdateTimestamp
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
 

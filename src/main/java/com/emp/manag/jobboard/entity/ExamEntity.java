@@ -1,6 +1,7 @@
 package com.emp.manag.jobboard.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -13,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -26,9 +28,12 @@ public class ExamEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer examid;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "assessment_id")
 	private AssessmentEntity assessment;
+
+	@OneToMany(mappedBy = "exam", fetch = FetchType.LAZY)
+	private List<ExamQuestionEntity> questions;
 
 	@Column(name = "exam_name")
 	private String examName;
@@ -38,22 +43,22 @@ public class ExamEntity {
 
 	@Column(name = "durationMinutes")
 	private Integer durationMinutes;
-	
+
 	@Column(name = "exam_instructions", columnDefinition = "TEXT")
 	private String examInstructions;
 
 	@Column(name = "total_questions")
 	private Integer totalquestions;
-		
+
 	@Column(name = "question_pattern")
 	private String questionPattern;
 
-	@Column(name = "created_at")
+	@Column(name = "pass_marks")
 	private Integer passMarks;
-	
-	@Column(name = "created_at", updatable = false)
+
+	@Column(name = "total_marks")
 	private Integer totalMarks;
-	
+
 	@Column(name = "status")
 	private String status;
 

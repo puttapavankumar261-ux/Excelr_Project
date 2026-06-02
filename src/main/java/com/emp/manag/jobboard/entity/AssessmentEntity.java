@@ -1,6 +1,7 @@
 package com.emp.manag.jobboard.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -39,8 +40,8 @@ public class AssessmentEntity {
 	@JoinColumn(name = "user_id")
 	private UserEntity user;
 	
-	@OneToMany(mappedBy = "assessments", fetch = FetchType.LAZY)
-	private ExamEntity exam;
+	@OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY)
+	private List<ExamEntity> exams;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_assessment_id")
@@ -70,10 +71,10 @@ public class AssessmentEntity {
 	@Column(name = "feedback")
 	private String feedback;
 
-	@Column(name = "created_at", updatable = false)
+	@Column(name = "started_at")
 	private LocalDateTime startedAt;
 
-	@Column(name = "updated_at")
+	@Column(name = "ends_at")
 	private LocalDateTime endsAt;
 
 	@Column(name = "assessment_status")

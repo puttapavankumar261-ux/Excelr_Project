@@ -45,6 +45,26 @@ public class UserAssessmentEntity {
     @Enumerated(EnumType.STRING)
     private CandidateStatus status;
 
+    @Column(name = "session_started_at")
+    private LocalDateTime sessionStartedAt;
+
+    @Column(name = "session_ends_at")
+    private LocalDateTime sessionEndsAt;
+
+    @Column(name = "submitted_at")
+    private LocalDateTime submittedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "session_status")
+    private AssessmentSessionStatus sessionStatus;
+
+    public enum AssessmentSessionStatus {
+        ASSIGNED,
+        IN_PROGRESS,
+        SUBMITTED,
+        EXPIRED
+    }
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;

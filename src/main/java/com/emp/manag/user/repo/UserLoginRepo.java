@@ -10,7 +10,7 @@ public interface UserLoginRepo extends JpaRepository<UserLoginEntity, Integer> {
 
 	boolean existsByUsername(String username);
 
-	boolean existsByUserUserLoginid(Integer userId);
+	boolean existsByUserUserId(Integer userId);
 
 	Optional<UserLoginEntity> findByUsername(String username);
 
