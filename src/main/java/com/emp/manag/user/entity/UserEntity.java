@@ -38,12 +38,11 @@ public class UserEntity {
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private EmpEntity employee; // Association with EmpEntity, can be null for non-employee users
 	
-	@JsonIgnore
-	@OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<UserEducationEntity> userEducation;
 	
 	@JsonIgnore
-	@OneToMany(mappedBy = "userId", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<UserExperienceEntity> userExperience;
 
 	@JsonIgnore
