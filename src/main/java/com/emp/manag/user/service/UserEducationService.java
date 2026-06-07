@@ -23,11 +23,11 @@ public class UserEducationService {
 
 	public UserEducationEntity saveEducation(UserEducationEntity education) {
 
-		Integer userId = education.getUserId().getUserId();
+		Integer userId = education.getUser().getUserId();
 		UserEntity user = userRepo.findById(userId)
 				.orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-		education.setUserId(user);
+		education.setUser(user);
 		
 		validateEducation(education);
 
@@ -130,7 +130,7 @@ public class UserEducationService {
 			throw new RuntimeException("Location is required");
 		}
 
-		if (education.getUserId() == null) {
+		if (education.getUser() == null) {
 			throw new RuntimeException("User ID is required for education details");
 		}
 	}

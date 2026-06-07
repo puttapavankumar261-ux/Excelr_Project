@@ -34,7 +34,7 @@ public class JobBoardController {
 		return "Job board updated successfully";
 	}
 
-	@GetMapping("/job-board")
+	@GetMapping("/getAll-job-board")
 	public List<JobBoardEntity> getAllJobBoards() {
 		return jobBoardService.getAllJobBoards();
 	}

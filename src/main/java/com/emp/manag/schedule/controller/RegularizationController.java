@@ -1,7 +1,10 @@
 package com.emp.manag.schedule.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -45,5 +48,11 @@ public class RegularizationController {
 	@DeleteMapping("/deleteregularizationbyid/{regularizationId}")
 	public String deleteRegularizationById(@PathVariable Integer regularizationId) {
 		return service.deleteById(regularizationId);
+	}
+	
+	@GetMapping("/getAllRegularization")
+	public List<RegularizationEntity> getAllRegularization () {
+		return service.getAllRegularization();
+		
 	}
 }

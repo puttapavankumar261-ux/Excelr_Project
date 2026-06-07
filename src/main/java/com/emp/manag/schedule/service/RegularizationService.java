@@ -3,6 +3,7 @@ package com.emp.manag.schedule.service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -266,5 +267,9 @@ public class RegularizationService {
 		}
 
 		return totalOfficeMinutes - regularOfficeMinutesIncludingBreak;
+	}
+
+	public List<RegularizationEntity> getAllRegularization() {
+		return regularizationRepo.findAll();
 	}
 }

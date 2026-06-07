@@ -49,7 +49,7 @@ public class JobApplicationController {
 		return jobApplicationService.getApplicationById(applicationId);
 	}
 
-	@GetMapping("/job-applications")
+	@GetMapping("/getAll-job-applications")
 	public List<JobApplicationEntity> getAllApplications() {
 		return jobApplicationService.getAllApplications();
 	}
@@ -74,12 +74,12 @@ public class JobApplicationController {
 		return jobApplicationService.getApplicationSummary();
 	}
 
-	@DeleteMapping("/job-applications/{applicationId}")
+	@DeleteMapping("/delete-job-applications/{applicationId}")
 	public String deleteApplication(@PathVariable Integer applicationId) {
 		return jobApplicationService.deleteApplication(applicationId);
 	}
 
-	@DeleteMapping("/job-applications")
+	@DeleteMapping("/deleteAll-job-applications")
 	public String deleteAllApplications() {
 		return jobApplicationService.deleteAllApplications();
 	}

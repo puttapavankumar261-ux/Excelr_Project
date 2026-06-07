@@ -25,11 +25,11 @@ public class UserExperienceService {
 
 		validateExperience(experience);
 
-		Integer userId = experience.getUserId().getUserId();
+		Integer userId = experience.getUser().getUserId();
 		UserEntity user = userRepo.findById(userId)
 				.orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
-		experience.setUserId(user);
+		experience.setUser(user);
 
 		return userExpRepo.save(experience);
 	}

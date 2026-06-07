@@ -65,7 +65,7 @@ public class UserExperienceEntity {
 	
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "user_id", nullable = false)
-	private UserEntity userId; // Foreign key to UserEntity, consider using @ManyToOne relationship
+	private UserEntity user; // Foreign key to UserEntity, consider using @ManyToOne relationship
 	
 	@CreationTimestamp
 	@Column(name = "created_at", updatable = false)

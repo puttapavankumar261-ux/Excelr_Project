@@ -1,7 +1,6 @@
 package com.emp.manag.jobboard.entity;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
@@ -53,13 +52,7 @@ public class AssessmentEntity {
 
 	@Column(name = "feedback")
 	private String feedback;
-
-	@Column(name = "starts_at")
-	private LocalTime startsAt;
-
-	@Column(name = "ends_at")
-	private LocalTime endsAt;
-
+		
 	@Column(name = "assessment_status")
 	private String assessmentStatus;
 

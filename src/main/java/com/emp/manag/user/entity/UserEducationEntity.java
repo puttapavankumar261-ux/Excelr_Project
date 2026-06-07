@@ -57,7 +57,7 @@ public class UserEducationEntity {
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "user_id")
-	private UserEntity userId;
+	private UserEntity user;
 	
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
