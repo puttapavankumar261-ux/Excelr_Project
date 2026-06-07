@@ -67,6 +67,9 @@ public class JobBoardService {
 	}
 
 	public void validationJobBoard(JobBoardEntity jobBoard) {
+		if (jobBoard == null) {
+			throw new RuntimeException("Job details are required");
+		}
 		if (jobBoard.getJobTitle() == null || jobBoard.getJobTitle().isEmpty()) {
 			throw new RuntimeException("Job title is required");
 		}
@@ -78,6 +81,12 @@ public class JobBoardService {
 		}
 		if (jobBoard.getApplicationDeadline() == null) {
 			throw new RuntimeException("Application deadline is required");
+		}
+		if (jobBoard.getEmploymentType() == null) {
+			throw new RuntimeException("Employment type is required");
+		}
+		if (jobBoard.getApplicationDeadline().isBefore(jobBoard.getPostedDate())) {
+			throw new RuntimeException("Application deadline cannot be before posted date");
 		}
 	}
 

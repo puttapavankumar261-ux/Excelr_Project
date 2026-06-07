@@ -41,7 +41,7 @@ public class ExamEntity {
 	@Column(name = "exam_type")
 	private String examType;
 
-	@Column(name = "durationMinutes")
+	@Column(name = "duration_minutes")
 	private Integer durationMinutes;
 
 	@Column(name = "exam_instructions", columnDefinition = "TEXT")

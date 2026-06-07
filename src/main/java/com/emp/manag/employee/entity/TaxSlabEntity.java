@@ -21,6 +21,7 @@ public class TaxSlabEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name="id")
 	private Integer id;
 
 	@Column(name = "slab_name", nullable = false)
@@ -34,6 +35,9 @@ public class TaxSlabEntity {
 
 	@Column(name = "percentage", nullable = false)
 	private BigDecimal percentage;
+	
+	@Column(name = "tax_regime_Type")
+	private String taxregimeType;//old or new
 
 	@Column(name = "active", nullable = false)
 	private Boolean active;

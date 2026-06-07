@@ -54,14 +54,11 @@ public class UserEntity {
 	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private UserLoginEntity userLogin; // One login record for this user
 	
-	@Column(name = "first_name", nullable = false)
-	private String firstName;
-
-	@Column(name = "middle_name")
-	private String middleName;
-
-	@Column(name = "last_name", nullable = false)
-	private String lastName;
+	@Column(name = "Name", nullable = false)
+	private String name;	
+	
+	@Column(name = "image")
+	private String image;
 
 	@Column(name = "date_of_birth")
 	private LocalDate dateOfBirth;

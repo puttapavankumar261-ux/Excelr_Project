@@ -1,13 +1,16 @@
 package com.emp.manag.employee.service;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.emp.manag.employee.entity.EmpEntity;
+import com.emp.manag.employee.entity.EmpEntity.EmploymentStatus;
 import com.emp.manag.employee.repo.EmpRepo;
 import com.emp.manag.schedule.entity.ShiftEntity;
 import com.emp.manag.schedule.repo.ShiftRepo;
@@ -30,10 +33,11 @@ public class EmpService {
 	public EmpEntity saveEmployee(EmpEntity employee) {
 
 		validateEmployee(employee);
+		validateManagerHierarchy(employee.getEmployeeid(), employee.getManager());
 		attachEmployeeRelations(employee);
 
-		if (employee.getEmploymentStatus() == null || employee.getEmploymentStatus().trim().isEmpty()) {
-			employee.setEmploymentStatus("ACTIVE");
+		if (employee.getEmploymentStatus() == null) {
+			employee.setEmploymentStatus(EmploymentStatus.ACTIVE);
 		}
 
 		return empRepo.save(employee);
@@ -50,12 +54,14 @@ public class EmpService {
 		EmpEntity existingEmployee = empRepo.findById(employeeId)
 				.orElseThrow(() -> new RuntimeException("Employee not found with ID: " + employeeId));
 
+		validateManagerHierarchy(employeeId, updatedEmployee.getManager());
+
 		existingEmployee.setUser(updatedEmployee.getUser());
 		existingEmployee.setManager(updatedEmployee.getManager());
 		existingEmployee.setShift(updatedEmployee.getShift());
 		attachEmployeeRelations(existingEmployee);
 
-		existingEmployee.setEmployeeName(updatedEmployee.getEmployeeName());
+		existingEmployee.setImage(updatedEmployee.getImage());		
 		existingEmployee.setRole(updatedEmployee.getRole());
 		existingEmployee.setJoiningDate(updatedEmployee.getJoiningDate());
 		existingEmployee.setResignationDate(updatedEmployee.getResignationDate());
@@ -101,21 +107,21 @@ public class EmpService {
 		if (employee == null) {
 			throw new RuntimeException("Employee details are required");
 		}
-
-		if (employee.getEmployeeName() == null || employee.getEmployeeName().trim().isEmpty()) {
-			throw new RuntimeException("Employee name is required");
-		}
-
-		if (employee.getRole() == null || employee.getRole().trim().isEmpty()) {
+		
+		if (employee.getRole() == null) {
 			throw new RuntimeException("Employee role is required");
 		}
 
-		if (employee.getDesignation() == null || employee.getDesignation().trim().isEmpty()) {
+		if (employee.getDesignation() == null) {
 			throw new RuntimeException("Employee designation is required");
 		}
 
-		if (employee.getDepartment() == null || employee.getDepartment().trim().isEmpty()) {
+		if (employee.getDepartment() == null) {
 			throw new RuntimeException("Employee department is required");
+		}
+
+		if (employee.getEmploymentType() == null) {
+			throw new RuntimeException("Employee employment type is required");
 		}
 
 		if (employee.getJoiningDate() != null && employee.getJoiningDate().isAfter(LocalDate.now())) {
@@ -149,6 +155,39 @@ public class EmpService {
 			ShiftEntity shift = shiftRepo.findById(shiftId)
 					.orElseThrow(() -> new RuntimeException("Shift not found with ID: " + shiftId));
 			employee.setShift(shift);
+		}
+	}
+
+	private void validateManagerHierarchy(Integer employeeId, EmpEntity manager) {
+
+		if (manager == null || manager.getEmployeeid() == null || employeeId == null) {
+			return;
+		}
+
+		Integer managerId = manager.getEmployeeid();
+
+		if (employeeId.equals(managerId)) {
+			throw new RuntimeException("Employee cannot be their own manager");
+		}
+
+		Set<Integer> visitedManagerIds = new HashSet<>();
+		Integer currentManagerId = managerId;
+
+		while (currentManagerId != null) {
+			if (!visitedManagerIds.add(currentManagerId)) {
+				throw new RuntimeException("Circular manager hierarchy detected");
+			}
+
+			if (employeeId.equals(currentManagerId)) {
+				throw new RuntimeException("Circular manager hierarchy detected: employee cannot report to a subordinate");
+			}
+
+			Integer lookupManagerId = currentManagerId;
+			EmpEntity currentManager = empRepo.findById(lookupManagerId)
+					.orElseThrow(() -> new RuntimeException("Manager not found with ID: " + lookupManagerId));
+
+			currentManagerId = currentManager.getManager() == null ? null
+					: currentManager.getManager().getEmployeeid();
 		}
 	}
 }

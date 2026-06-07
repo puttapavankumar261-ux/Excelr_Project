@@ -46,7 +46,7 @@ public class ExamQuestionEntity {
 	private Integer marksObtained;
 
 	@Column(name = "result")
-	private Integer result;
+	private Boolean correct; 
 
 	@Column(name = "total_marks")
 	private Integer totalMarks;

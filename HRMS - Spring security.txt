@@ -1,0 +1,291 @@
+Step 1 — Add dependency to pom.xml
+xml<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+
+====================================================================================================================================================================
+
+Step 2 — Create Role entity table
+This is your checkbox-driven role management table:
+
+package com.emp.manag.security.entity;
+
+import jakarta.persistence.*;
+import lombok.Data;
+
+@Data
+@Entity
+@Table(name = "roles")
+public class RoleEntity {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer roleId;
+
+    @Column(name = "role_name", nullable = false, unique = true)
+    private String roleName;          // ROLE_HR, ROLE_MANAGER, ROLE_EMPLOYEE
+
+    @Column(name = "description")
+    private String description;       // Human readable — "HR Administrator"
+
+    @Column(name = "is_active")
+    private Boolean isActive = true;  // your checkbox toggle in frontend
+}
+
+====================================================================================================================================================================
+
+Step 3 — Create UserPrincipal (Spring Security user wrapper)
+
+package com.emp.manag.security;
+
+import java.util.Collection;
+import java.util.List;
+
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+
+public class UserPrincipal implements UserDetails {
+
+    private final Integer id;
+    private final String username;
+    private final String password;
+    private final String principalType;   // "EMPLOYEE" or "USER"
+    private final List<GrantedAuthority> authorities;
+
+    public UserPrincipal(Integer id, String username, String password,
+                         String role, String principalType) {
+        this.id            = id;
+        this.username      = username;
+        this.password      = password;
+        this.principalType = principalType;
+        this.authorities   = List.of(new SimpleGrantedAuthority("ROLE_" + role));
+    }
+
+    public Integer getId()            { return id; }
+    public String getPrincipalType()  { return principalType; }
+
+    @Override public Collection<? extends GrantedAuthority> getAuthorities() { return authorities; }
+    @Override public String getPassword()                                     { return password; }
+    @Override public String getUsername()                                     { return username; }
+    @Override public boolean isAccountNonExpired()                            { return true; }
+    @Override public boolean isAccountNonLocked()                             { return true; }
+    @Override public boolean isCredentialsNonExpired()                        { return true; }
+    @Override public boolean isEnabled()                                      { return true; }
+}
+
+====================================================================================================================================================================
+
+Step 4 — Create CustomUserDetailsService
+This is the bridge between Spring Security and your existing Employee/User login tables:
+
+package com.emp.manag.security;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+
+import com.emp.manag.employee.entity.EmpLoginEntity;
+import com.emp.manag.employee.repo.EmpLoginRepo;
+import com.emp.manag.user.entity.UserLoginEntity;
+import com.emp.manag.user.repo.UserLoginRepo;
+
+@Service
+public class CustomUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private EmpLoginRepo empLoginRepo;
+
+    @Autowired
+    private UserLoginRepo userLoginRepo;
+
+    @Override
+    public UserDetails loadUserByUsername(String username)
+            throws UsernameNotFoundException {
+
+        // Check employee login table first
+        return empLoginRepo.findByUsername(username)
+                .map(emp -> new UserPrincipal(
+                        emp.getLoginid(),
+                        emp.getUsername(),
+                        emp.getPasswordHash(),
+                        emp.getRole(),
+                        "EMPLOYEE"))
+                // If not found check user login table
+                .or(() -> userLoginRepo.findByUsername(username)
+                        .map(user -> new UserPrincipal(
+                                user.getUserLoginId(),
+                                user.getUsername(),
+                                user.getPasswordHash(),
+                                user.getRole(),
+                                "USER")))
+                .orElseThrow(() -> new UsernameNotFoundException(
+                        "No account found for username: " + username));
+    }
+}
+
+====================================================================================================================================================================
+
+Step 5 — Create SecurityConfig (the main config file)
+
+package com.emp.manag.security;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+@EnableWebSecurity
+@EnableMethodSecurity        // enables @PreAuthorize on controllers
+public class SecurityConfig {
+
+    private final CustomUserDetailsService userDetailsService;
+
+    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
+
+    // ── Password encoder ──────────────────────────────────────────
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    // ── Authentication provider ───────────────────────────────────
+    @Bean
+    public DaoAuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
+
+    // ── Authentication manager ────────────────────────────────────
+    @Bean
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    // ── Security filter chain — URL access rules ──────────────────
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+        http
+            .csrf(csrf -> csrf.disable())   // disabled — React handles its own state
+
+            .authorizeHttpRequests(auth -> auth
+
+                // Public endpoints — no login required
+                .requestMatchers("/api/employee-management/employee/login").permitAll()
+                .requestMatchers("/api/employee-management/user/login").permitAll()
+                .requestMatchers("/api/employee-management/user/logout").permitAll()
+                .requestMatchers("/api/employee-management/employee/logout").permitAll()
+                .requestMatchers("/api/employee-management/info").permitAll()
+
+                // HR only — payroll, payslip approval, tax slabs
+                .requestMatchers("/api/employee-management/approvepayroll/**").hasRole("HR")
+                .requestMatchers("/api/employee-management/approvepayslip/**").hasRole("HR")
+                .requestMatchers("/api/employee-management/savetaxslab/**").hasRole("HR")
+                .requestMatchers("/api/employee-management/savelogin/**").hasRole("HR")
+
+                // HR and MANAGER — employee management
+                .requestMatchers("/api/employee-management/Saveemp/**").hasAnyRole("HR", "MANAGER")
+                .requestMatchers("/api/employee-management/Update/**").hasAnyRole("HR", "MANAGER")
+                .requestMatchers("/api/employee-management/DeleteEmp/**").hasAnyRole("HR", "MANAGER")
+
+                // Leave approval — team lead and above
+                .requestMatchers("/api/employee-management/approveleave**").hasAnyRole("HR", "MANAGER", "TEAM_LEAD")
+                .requestMatchers("/api/employee-management/rejectleave**").hasAnyRole("HR", "MANAGER", "TEAM_LEAD")
+
+                // All other API calls — just need to be logged in
+                .requestMatchers("/api/**").authenticated()
+
+                // Everything else — public (React static files)
+                .anyRequest().permitAll()
+            )
+
+            // Use session (matches your existing HttpSession approach)
+            .sessionManagement(session -> session
+                .maximumSessions(1)          // one session per user
+            )
+
+            // Custom login — handled by your existing controllers
+            .formLogin(form -> form.disable())
+
+            // Custom logout
+            .logout(logout -> logout
+                .logoutUrl("/api/employee-management/logout")
+                .invalidateHttpSession(true)
+                .deleteCookies("JSESSIONID")
+            );
+
+        return http.build();
+    }
+}
+
+
+====================================================================================================================================================================
+
+Step 6 — Controller-level role guard with @PreAuthorize
+Once security is active, you can guard individual methods like this — useful for your checkbox idea:
+
+// Only HR can approve payroll
+@PreAuthorize("hasRole('HR')")
+@PutMapping("/approvepayroll/{payrollId}/{approvedById}")
+public PayrollEntity approvePayroll(...) { ... }
+
+// HR and Manager can save employees
+@PreAuthorize("hasAnyRole('HR', 'MANAGER')")
+@PostMapping("/Saveemp")
+public EmpEntity saveEmployee(...) { ... }
+
+// Any logged in user can view
+@PreAuthorize("isAuthenticated()")
+@GetMapping("/GetAllEmp")
+public List<EmpEntity> displayEmployee() { ... }
+
+====================================================================================================================================================================
+
+Step 7 — BCrypt password utility
+When you create test data, use this to generate hashed passwords. Add temporarily to any service or a test class:
+
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+// Run this once to get hashed passwords for your test data
+BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+System.out.println(encoder.encode("yourPassword123"));
+// Copy the output and store it in the password_hash column
+
+====================================================================================================================================================================
+
+Step 8 — Update EmpLoginService and UserLoginService
+When security is added, replace the plain text comparison in matchesPassword():
+
+// Current — REMOVE this
+private boolean matchesPassword(String rawPassword, String storedPasswordHash) {
+    return storedPasswordHash != null && storedPasswordHash.equals(rawPassword);
+}
+
+// Replace with BCrypt check
+@Autowired
+private PasswordEncoder passwordEncoder;
+
+private boolean matchesPassword(String rawPassword, String storedPasswordHash) {
+    return passwordEncoder.matches(rawPassword, storedPasswordHash);
+}
+
+
+====================================================================================================================================================================

@@ -24,6 +24,7 @@ public class EmpController {
 
 	@PostMapping("/Saveemp")
 	public EmpEntity saveEmployee(@RequestBody EmpEntity employee) {
+		System.out.println("===== REQUEST RECEIVED =====");
 		System.out.println("Employee Data Saved");
 		return service.saveEmployee(employee);
 	}

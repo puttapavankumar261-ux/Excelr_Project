@@ -1,13 +1,11 @@
 package com.emp.manag.jobboard.entity;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import com.emp.manag.user.entity.UserAssessmentEntity;
-import com.emp.manag.user.entity.UserEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,67 +23,55 @@ import lombok.Data;
 @Data
 @Table(name = "assessment")
 public class AssessmentEntity {
-	
-	
+
 	@Id
 	@Column(name = "assessment_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer assessmentId;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "job_id")
 	private JobBoardEntity job;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
-	private UserEntity user;
-	
-	@OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY)
-	private List<ExamEntity> exams;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_assessment_id")
-	private UserAssessmentEntity userAssessment;
-	
+
 	@Column(name = "assessment_name")
 	private String assessmentName;
-	
+
 	@Column(name = "total_score")
 	private Integer totalScore;
 
 	@Column(name = "qualifying_score")
 	private Integer qualifyingScore;
-		
-	@Column(name = "assessment_date")
-	private LocalDateTime assessmentDate;
-	
+
 	@Column(name = "assessment_stage")
 	private String assessmentStage;
-	
+
 	@Column(name = "assessment_type")
 	private String assessmentType;
-	
+
 	@Column(name = "assessment_result")
 	private String assessmentResult;
-	
+
 	@Column(name = "feedback")
 	private String feedback;
 
-	@Column(name = "started_at")
-	private LocalDateTime startedAt;
+	@Column(name = "starts_at")
+	private LocalTime startsAt;
 
 	@Column(name = "ends_at")
-	private LocalDateTime endsAt;
+	private LocalTime endsAt;
 
 	@Column(name = "assessment_status")
-	private Boolean submitted;
-	
+	private String assessmentStatus;
+
 	@CreationTimestamp
 	@Column(name = "created_at")
 	private LocalDateTime createdAt;
-	
+
 	@UpdateTimestamp
 	@Column(name = "updated_at")
 	private LocalDateTime updatedAt;
+
+	@OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY)
+	private List<ExamEntity> exams;
 
 }

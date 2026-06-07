@@ -153,16 +153,28 @@ public class EmpLoginService {
 		session.setAttribute("username", login.getUsername());
 		session.setAttribute("role", login.getRole());
 		session.setAttribute("loginAt", loginAt);
+		session.setAttribute("department", login.getEmployee().getDepartment() == null
+				? null : login.getEmployee().getDepartment().name());
 
 		return buildSessionResponse(session, true, "Employee login successful");
 	}
 
 	public SessionResponse getSession(HttpSession session) {
-		if (session == null || session.getAttribute("employeeLoginId") == null) {
-			return new SessionResponse(null, "EMPLOYEE", null, null, null, null, null, false,
-					"No active employee session");
-		}
-		return buildSessionResponse(session, true, "Employee session is active");
+	    if (session == null || session.getAttribute("employeeLoginId") == null) {
+	        return new SessionResponse(
+	            null,           // sessionId
+	            "EMPLOYEE",     // principalType
+	            null,           // id
+	            null,           // username
+	            null,           // role
+	            null,           // department  ← add this null
+	            null,           // loginAt
+	            null,           // expiresAt
+	            false,          // authenticated
+	            "No active employee session"  // message
+	        );
+	    }
+	    return buildSessionResponse(session, true, "Employee session is active");
 	}
 
 	public SessionResponse logout(HttpSession session) {
@@ -200,11 +212,25 @@ public class EmpLoginService {
 		return storedPasswordHash != null && storedPasswordHash.equals(rawPassword);
 	}
 
-	private SessionResponse buildSessionResponse(HttpSession session, boolean authenticated, String message) {
+	private SessionResponse buildSessionResponse(HttpSession session,
+			boolean authenticated, String message) {
+		
 		LocalDateTime loginAt = (LocalDateTime) session.getAttribute("loginAt");
-		LocalDateTime expiresAt = loginAt == null ? null : loginAt.plusSeconds(session.getMaxInactiveInterval());
-		return new SessionResponse(session.getId(), "EMPLOYEE", (Integer) session.getAttribute("employeeId"),
-				(String) session.getAttribute("username"), (String) session.getAttribute("role"), loginAt, expiresAt,
-				authenticated, message);
-	}
+		LocalDateTime expiresAt = loginAt == null ? null : 
+			loginAt.plusSeconds(session.getMaxInactiveInterval());
+		
+		  return new SessionResponse(
+			        session.getId(),                                        // 1 - sessionId
+			        "EMPLOYEE",                                            // 2 - principalType
+			        (Integer) session.getAttribute("employeeId"),          // 3 - id
+			        (String) session.getAttribute("username"),             // 4 - username
+			        (String) session.getAttribute("role"),                 // 5 - role
+			        (String) session.getAttribute("department"),           // 6 - department
+			        loginAt,                                               // 7 - loginAt
+			        expiresAt,                                             // 8 - expiresAt
+			        authenticated,                                         // 9 - authenticated
+			        message                                                // 10 - message
+			    );
+}
+
 }

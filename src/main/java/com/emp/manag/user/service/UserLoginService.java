@@ -163,13 +163,25 @@ public class UserLoginService {
 		session.setAttribute("username", login.getUsername());
 		session.setAttribute("role", login.getRole());
 		session.setAttribute("loginAt", loginAt);
+		
 
 		return buildSessionResponse(session, true, "User login successful");
 	}
 
 	public SessionResponse getSession(HttpSession session) {
 		if (session == null || session.getAttribute("userLoginId") == null) {
-			return new SessionResponse(null, "USER", null, null, null, null, null, false, "No active user session");
+			return new SessionResponse(
+				    null,       // 1
+				    "USER",     // 2
+				    null,       // 3
+				    null,       // 4
+				    null,       // 5
+				    
+				    null,       // 7
+				    null,       // 8
+				    false,      // 9
+				    "No active user session"  // 10
+				);
 		}
 		return buildSessionResponse(session, true, "User session is active");
 	}
@@ -215,11 +227,23 @@ public class UserLoginService {
 	}
 
 	private SessionResponse buildSessionResponse(HttpSession session, boolean authenticated, String message) {
-		LocalDateTime loginAt = (LocalDateTime) session.getAttribute("loginAt");
-		LocalDateTime expiresAt = loginAt == null ? null : loginAt.plusSeconds(session.getMaxInactiveInterval());
-		return new SessionResponse(session.getId(), "USER", (Integer) session.getAttribute("userId"),
-				(String) session.getAttribute("username"), (String) session.getAttribute("role"), loginAt, expiresAt,
-				authenticated, message);
+
+	    LocalDateTime loginAt = (LocalDateTime) session.getAttribute("loginAt");
+	    LocalDateTime expiresAt = loginAt == null ? null 
+	                            : loginAt.plusSeconds(session.getMaxInactiveInterval());
+
+	    return new SessionResponse(
+	        session.getId(),                                  // 1 - sessionId
+	        "USER",                                           // 2 - principalType
+	        (Integer) session.getAttribute("userId"),         // 3 - id
+	        (String) session.getAttribute("username"),        // 4 - username
+	        (String) session.getAttribute("role"),            // 5 - role
+	        
+	        loginAt,                                          // 7 - loginAt
+	        expiresAt,                                        // 8 - expiresAt
+	        authenticated,                                    // 9 - authenticated
+	        message                                           // 10 - message
+	    );
 	}
 	
 }

@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.emp.manag.jobboard.entity.AssessmentEntity;
 import com.emp.manag.jobboard.entity.ExamEntity;
 import com.emp.manag.jobboard.entity.JobApplicationEntity;
+
 import com.emp.manag.jobboard.repo.AssessmentRepo;
 import com.emp.manag.jobboard.repo.ExamRepo;
 import com.emp.manag.jobboard.repo.JobApplicationRepo;
@@ -39,6 +40,7 @@ public class UserAssessmentService {
 
 	@Autowired
 	private ExamRepo examRepo;
+	
 
 	public UserAssessmentEntity saveUserAssessment(UserAssessmentEntity userAssessment) {
 
@@ -60,6 +62,8 @@ public class UserAssessmentService {
 		userAssessment.setUser(user);
 		userAssessment.setJob(Job);
 		userAssessment.setAssessment(assessment);
+		
+		
 		if (userAssessment.getSessionStatus() == null) {
 			userAssessment.setSessionStatus(AssessmentSessionStatus.ASSIGNED);
 		}
@@ -79,8 +83,7 @@ public class UserAssessmentService {
 				.orElseThrow(() -> new RuntimeException("User Assessment not found with ID: " + userAssessmentId));
 
 		existingUserAssessment.setScore(updatedUserAssessment.getScore());
-		existingUserAssessment.setPassed(updatedUserAssessment.getPassed());
-		existingUserAssessment.setStatus(updatedUserAssessment.getStatus());
+		existingUserAssessment.setPassed(updatedUserAssessment.getPassed());		
 		existingUserAssessment.setAssessment(updatedUserAssessment.getAssessment());
 		existingUserAssessment.setUser(updatedUserAssessment.getUser());
 		existingUserAssessment.setJob(updatedUserAssessment.getJob());
@@ -167,8 +170,7 @@ public class UserAssessmentService {
 
 		if (submission != null) {
 			userAssessment.setScore(submission.getScore());
-			userAssessment.setPassed(submission.getPassed());
-			userAssessment.setStatus(submission.getStatus());
+			userAssessment.setPassed(submission.getPassed());			
 		}
 		userAssessment.setSubmittedAt(LocalDateTime.now());
 		userAssessment.setSessionStatus(AssessmentSessionStatus.SUBMITTED);
@@ -190,15 +192,7 @@ public class UserAssessmentService {
 		if (!userRepo.existsById(userAssessment.getUser().getUserId())) {
 			throw new RuntimeException("User not found with ID: " + userAssessment.getUser().getUserId());
 		}
-
-		if (userAssessment.getScore() == null) {
-			throw new RuntimeException("Score is required for the assessment");
-		}
-
-		if (userAssessment.getPassed() == null) {
-			throw new RuntimeException("Pass status is required for the assessment");
-		}
-
+		
 	}
 
 	private int resolveDurationMinutes(UserAssessmentEntity userAssessment) {

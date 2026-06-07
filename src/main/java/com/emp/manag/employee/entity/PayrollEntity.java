@@ -25,6 +25,7 @@ public class PayrollEntity {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "payrollId")
 	private Integer payrollId;
 
 	@ManyToOne
@@ -83,7 +84,9 @@ public class PayrollEntity {
 
 		PAID,
 
-		REJECTED
+		REJECTED,
+		
+		On_Hold
 	}
 
 	@Enumerated(EnumType.STRING)

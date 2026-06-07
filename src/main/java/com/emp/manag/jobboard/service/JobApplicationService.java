@@ -11,12 +11,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.emp.manag.config.dto.JobApplicationSummary;
+import com.emp.manag.jobboard.entity.AssessmentEntity;
 import com.emp.manag.jobboard.entity.JobApplicationEntity;
 import com.emp.manag.jobboard.entity.JobApplicationEntity.CandidateStatus;
 import com.emp.manag.jobboard.entity.JobBoardEntity;
+import com.emp.manag.jobboard.repo.AssessmentRepo;
 import com.emp.manag.jobboard.repo.JobApplicationRepo;
 import com.emp.manag.jobboard.repo.JobBoardRepo;
+import com.emp.manag.user.entity.UserAssessmentEntity;
 import com.emp.manag.user.entity.UserEntity;
+import com.emp.manag.user.repo.UserAssessmentRepo;
 import com.emp.manag.user.repo.UserRepo;
 
 @Service
@@ -31,6 +35,12 @@ public class JobApplicationService {
 
 	@Autowired
 	private JobBoardRepo jobBoardRepo;
+
+	@Autowired
+	private AssessmentRepo assessmentRepo;
+
+	@Autowired
+	private UserAssessmentRepo userAssessmentRepo;
 
 	public JobApplicationEntity save(JobApplicationEntity application) {
 
@@ -49,7 +59,7 @@ public class JobApplicationService {
 				.orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
 
 		if (job.getApplicationDeadline() != null && job.getApplicationDeadline().isBefore(LocalDateTime.now())) {
-			throw new RuntimeException("Application deadline is completed for this job");
+			throw new RuntimeException("Application deadline has passed for this job");
 		}
 
 		application.setUser(user);
@@ -57,7 +67,24 @@ public class JobApplicationService {
 		application.setAppliedDate(LocalDateTime.now());
 		application.setStatus(CandidateStatus.APPLIED);
 
-		return applicationRepo.save(application);
+		JobApplicationEntity savedApplication = applicationRepo.save(application);
+		List<AssessmentEntity> assessments = assessmentRepo.findByJobJobId(jobId);
+		if (!assessments.isEmpty()) {
+			AssessmentEntity assessment = assessments.get(0); // first assessment for the job
+
+			UserAssessmentEntity userAssessment = new UserAssessmentEntity();
+			userAssessment.setUser(user);
+			userAssessment.setJob(savedApplication);
+			userAssessment.setAssessment(assessment);
+			userAssessment.setSessionStatus(UserAssessmentEntity.AssessmentSessionStatus.ASSIGNED);
+			userAssessmentRepo.save(userAssessment);
+
+			// Update application status to reflect assessment is pending
+			savedApplication.setStatus(CandidateStatus.ASSESSMENT_PENDING);
+			applicationRepo.save(savedApplication);
+		}
+
+		return savedApplication;
 	}
 
 	public String updateApplication(Integer applicationId, JobApplicationEntity updatedApplication) {
@@ -174,8 +201,7 @@ public class JobApplicationService {
 	}
 
 	private boolean isFinalStatus(CandidateStatus status) {
-		return status == CandidateStatus.ASSESSMENT_FAILED
-				|| status == CandidateStatus.INTERVIEW_REJECTED
+		return status == CandidateStatus.ASSESSMENT_FAILED || status == CandidateStatus.INTERVIEW_REJECTED
 				|| status == CandidateStatus.ONBOARDED;
 	}
 

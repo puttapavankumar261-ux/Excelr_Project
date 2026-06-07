@@ -55,9 +55,9 @@ public class ExamQuestionService {
 		existingQuestion.setQuestionType(updatedquestion.getQuestionType());
 		existingQuestion.setMarks(updatedquestion.getMarks());
 		existingQuestion.setMarksObtained(updatedquestion.getMarksObtained());
-		existingQuestion.setResult(updatedquestion.getResult());
+		existingQuestion.setCorrect(updatedquestion.getCorrect());
 
-		questionRepo.save(updatedquestion);
+		questionRepo.save(existingQuestion);
 
 		return "Question updated successfully";
 	}

@@ -7,7 +7,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.emp.manag.jobboard.entity.AssessmentEntity;
 import com.emp.manag.jobboard.entity.JobApplicationEntity;
-import com.emp.manag.jobboard.entity.JobApplicationEntity.CandidateStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -26,59 +25,56 @@ import lombok.Data;
 @Data
 @Table(name = "user_assessment")
 public class UserAssessmentEntity {
-	
+
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "user_assessment_id")
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "user_assessment_id")
 	private Integer userAssessmentId;
-	
+
 	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "assessment_id")
 	private AssessmentEntity assessment;
 
 	@Column(name = "score")
-    private Integer score;
+	private Integer score;
 
 	@Column(name = "passed")
-    private Boolean passed;
+	private Boolean passed;
 
-    @Enumerated(EnumType.STRING)
-    private CandidateStatus status;
+	@Column(name = "session_started_at")
+	private LocalDateTime sessionStartedAt;
 
-    @Column(name = "session_started_at")
-    private LocalDateTime sessionStartedAt;
+	@Column(name = "session_ends_at")
+	private LocalDateTime sessionEndsAt;
 
-    @Column(name = "session_ends_at")
-    private LocalDateTime sessionEndsAt;
+	@Column(name = "submitted_at")
+	private LocalDateTime submittedAt;
 
-    @Column(name = "submitted_at")
-    private LocalDateTime submittedAt;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "session_status")
+	private AssessmentSessionStatus sessionStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "session_status")
-    private AssessmentSessionStatus sessionStatus;
+	public enum AssessmentSessionStatus {
+		ASSIGNED, IN_PROGRESS, SUBMITTED, EXPIRED
+	}
 
-    public enum AssessmentSessionStatus {
-        ASSIGNED,
-        IN_PROGRESS,
-        SUBMITTED,
-        EXPIRED
-    }
+	@Column(name = "assessment_date")
+	private LocalDateTime assessmentDate;
+	
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private UserEntity user;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private UserEntity user;
+	@ManyToOne
+	@JoinColumn(name = "job_id")
+	private JobApplicationEntity job;
 
-    @ManyToOne
-    @JoinColumn(name = "job_id")
-    private JobApplicationEntity job;
-    
-    @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createAt;
-    
-    @UpdateTimestamp
-    @Column(name = "updated_at")
-    private LocalDateTime updateAt;
+	@CreationTimestamp
+	@Column(name = "created_at", updatable = false)
+	private LocalDateTime createdAt;
+
+	@UpdateTimestamp
+	@Column(name = "updated_at")
+	private LocalDateTime updatedAt;
 
 }

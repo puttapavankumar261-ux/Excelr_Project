@@ -46,6 +46,7 @@ public class TaxSlabService {
 		existingTaxSlab.setMaxAmount(updatedTaxSlab.getMaxAmount());
 		existingTaxSlab.setPercentage(updatedTaxSlab.getPercentage());
 		existingTaxSlab.setActive(updatedTaxSlab.getActive());
+		existingTaxSlab.setTaxregimeType(updatedTaxSlab.getTaxregimeType());
 
 		return taxSlabRepo.save(existingTaxSlab);
 	}

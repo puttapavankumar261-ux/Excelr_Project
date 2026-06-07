@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.emp.manag.config.ApiConfig;
 
 @RestController
-@RequestMapping("/api/employee-management")
+@RequestMapping("/employee-management")
 public class CommonApiController {
 
 	private final ApiConfig apiConfig;
