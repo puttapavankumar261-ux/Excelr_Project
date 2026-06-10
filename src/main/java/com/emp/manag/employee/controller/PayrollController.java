@@ -61,4 +61,9 @@ public class PayrollController {
 	public String deletePayroll(@PathVariable Integer payrollId) {
 		return payrollService.deletePayroll(payrollId);
 	}
+	
+	@DeleteMapping("/DeleteAllPayrolls")
+	public String deleteAllPayroll() {
+	 return	payrollService.deleteAllPayrolls();
+	}
 }

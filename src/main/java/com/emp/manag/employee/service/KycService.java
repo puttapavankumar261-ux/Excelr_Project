@@ -120,6 +120,11 @@ public class KycService {
 
 		return "KYC deleted successfully";
 	}
+	
+	public String deleteAllKyc() {
+		kycRepo.deleteAll();
+		return "All KYC records deleted successfully";
+	}
 
 	private void validateKyc(KycEntity kyc) {
 

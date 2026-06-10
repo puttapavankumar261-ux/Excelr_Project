@@ -164,6 +164,11 @@ public class PayslipService {
 		return "Payslip deleted successfully";
 	}
 
+	public String deleteAllPayslips() {
+		payslipRepo.deleteAll();
+		return "All Payslips records deleted successfully";
+	}
+	
 	private void recalculatePayslip(PayslipEntity payslip, PayrollEntity payroll,
 			MonthlyAttendanceSummaryEntity summary) {
 

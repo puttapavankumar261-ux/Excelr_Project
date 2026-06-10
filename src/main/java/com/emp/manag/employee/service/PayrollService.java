@@ -149,6 +149,11 @@ public class PayrollService {
 
 		return "Payroll deleted successfully";
 	}
+	
+	public String deleteAllPayrolls() {
+		 payrollRepo.deleteAll();
+		 return "All payroll records deleted successfully";
+	}
 
 	private void validatePayroll(PayrollEntity payroll) {
 

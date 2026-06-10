@@ -67,4 +67,11 @@ public class PayslipController {
 	public String deletePayslip(@PathVariable Integer payslipId) {
 		return payslipService.deletePayslip(payslipId);
 	}
+	
+	
+	@DeleteMapping("/DeleteAllPayslips")
+	public String deleteAllPayslips() {
+		return payslipService.deleteAllPayslips();
+	}
+	
 }

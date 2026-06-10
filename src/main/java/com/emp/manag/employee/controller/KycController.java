@@ -56,4 +56,10 @@ public class KycController {
 	public String deleteKyc(@PathVariable Integer kycId) {
 		return kycService.deleteKyc(kycId);
 	}
+	
+	@DeleteMapping("/DeleteAllKyc")
+	public String deleteAllKyc(){
+		return kycService.deleteAllKyc();
+		
+	}
 }
