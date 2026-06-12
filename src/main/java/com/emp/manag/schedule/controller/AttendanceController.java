@@ -49,7 +49,7 @@ public class AttendanceController {
 		return service.calculateMonthlyWorkingDays(employeeId, year, month);
 	}
 
-	@DeleteMapping("/deleteattendancebyid/{attendanceId}")
+	@DeleteMapping("/deleteattendancebyid/${attendanceId}")
 	public String deleteAttendanceById(@PathVariable Integer attendanceId) {
 		service.deleteById(attendanceId);
 		return "Attendance record with ID " + attendanceId + " has been deleted.";

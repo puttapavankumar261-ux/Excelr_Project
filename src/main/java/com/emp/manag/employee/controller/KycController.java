@@ -27,22 +27,22 @@ public class KycController {
 		return kycService.saveKyc(kyc);
 	}
 
-	@PutMapping("/updatekyc/{kycId}")
+	@PutMapping("/updatekyc/${kycId}")
 	public KycEntity updateKyc(@PathVariable Integer kycId, @RequestBody KycEntity kyc) {
 		return kycService.updateKyc(kycId, kyc);
 	}
 
-	@PutMapping("/verifykyc/{kycId}/{verifiedById}")
+	@PutMapping("/verifykyc/${kycId}/{verifiedById}")
 	public KycEntity verifyKyc(@PathVariable Integer kycId, @PathVariable Integer verifiedById) {
 		return kycService.verifyKyc(kycId, verifiedById);
 	}
 
-	@GetMapping("/getkyc/{kycId}")
+	@GetMapping("/getkyc/${kycId}")
 	public KycEntity getKycById(@PathVariable Integer kycId) {
 		return kycService.getKycById(kycId);
 	}
 
-	@GetMapping("/getemployeekyc/{employeeId}")
+	@GetMapping("/getemployeekyc/${employeeId}")
 	public KycEntity getKycByEmployee(@PathVariable Integer employeeId) {
 		return kycService.getKycByEmployee(employeeId);
 	}
@@ -52,7 +52,7 @@ public class KycController {
 		return kycService.getAllKycs();
 	}
 
-	@DeleteMapping("/deletekyc/{kycId}")
+	@DeleteMapping("/deletekyc/${kycId}")
 	public String deleteKyc(@PathVariable Integer kycId) {
 		return kycService.deleteKyc(kycId);
 	}

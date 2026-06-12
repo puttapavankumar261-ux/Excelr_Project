@@ -269,6 +269,20 @@ public class RegularizationService {
 		return totalOfficeMinutes - regularOfficeMinutesIncludingBreak;
 	}
 
+	public RegularizationEntity getById(Integer regularizationId) {
+
+	    if (regularizationId == null) {
+	        throw new RuntimeException("Regularization ID is required");
+	    }
+
+	    return regularizationRepo.findById(regularizationId)
+	            .orElseThrow(() ->
+	                new RuntimeException(
+	                    "Regularization record not found with ID: " + regularizationId
+	                )
+	            );
+	}
+	
 	public List<RegularizationEntity> getAllRegularization() {
 		return regularizationRepo.findAll();
 	}

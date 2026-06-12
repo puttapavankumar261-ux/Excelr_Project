@@ -20,7 +20,7 @@ public class MonthlyAttendanceSummaryController {
 	@Autowired
 	private MonthlyAttendanceSummaryService monthlyAttendanceSummaryService;
 
-	@PostMapping("/generatemonthlysummary/{employeeId}/{year}/{month}")
+	@PostMapping("/save-generatemonthlysummary/{employeeId}/{year}/{month}")
 	public MonthlyAttendanceSummaryEntity generateMonthlySummary(@PathVariable Integer employeeId,
 			@PathVariable Integer year, @PathVariable Integer month) {
 		return monthlyAttendanceSummaryService.generateMonthlySummary(employeeId, year, month);

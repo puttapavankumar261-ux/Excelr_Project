@@ -21,39 +21,39 @@ public class PayslipController {
 	@Autowired
 	private PayslipService payslipService;
 
-	@PostMapping("/generatepayslip/{employeeId}/{year}/{month}")
+	@PostMapping("/generatepayslip/${employeeId}/${year}/${month}")
 	public PayslipEntity generatePayslip(@PathVariable Integer employeeId,
 			@PathVariable Integer year, @PathVariable Integer month) {
 		return payslipService.generatePayslip(employeeId, year, month);
 	}
 
-	@PutMapping("/recalculatepayslip/{payslipId}")
+	@PutMapping("/recalculatepayslip/${payslipId}")
 	public PayslipEntity recalculatePayslip(@PathVariable Integer payslipId) {
 		return payslipService.recalculatePayslip(payslipId);
 	}
 
-	@PutMapping("/approvepayslip/{payslipId}/{approvedById}")
+	@PutMapping("/approvepayslip/${payslipId}/${approvedById}")
 	public PayslipEntity approvePayslip(@PathVariable Integer payslipId, @PathVariable Integer approvedById) {
 		return payslipService.approvePayslip(payslipId, approvedById);
 	}
 
-	@PutMapping("/markpayslippaid/{payslipId}")
+	@PutMapping("/markpayslippaid/${payslipId}")
 	public PayslipEntity markPayslipPaid(@PathVariable Integer payslipId) {
 		return payslipService.markPayslipPaid(payslipId);
 	}
 
-	@GetMapping("/getpayslip/{payslipId}")
+	@GetMapping("/getpayslip/${payslipId}")
 	public PayslipEntity getPayslipById(@PathVariable Integer payslipId) {
 		return payslipService.getPayslipById(payslipId);
 	}
 
-	@GetMapping("/getemployeepayslip/{employeeId}/{year}/{month}")
+	@GetMapping("/getemployeepayslip/${employeeId}/${year}/${month}")
 	public PayslipEntity getPayslipByEmployeeMonth(@PathVariable Integer employeeId,
 			@PathVariable Integer year, @PathVariable Integer month) {
 		return payslipService.getPayslipByEmployeeMonth(employeeId, year, month);
 	}
 
-	@GetMapping("/getemployeepayslips/{employeeId}")
+	@GetMapping("/getemployeepayslips/${employeeId}")
 	public List<PayslipEntity> getPayslipsByEmployee(@PathVariable Integer employeeId) {
 		return payslipService.getPayslipsByEmployee(employeeId);
 	}
@@ -63,7 +63,7 @@ public class PayslipController {
 		return payslipService.getAllPayslips();
 	}
 
-	@DeleteMapping("/deletepayslip/{payslipId}")
+	@DeleteMapping("/deletepayslip/${payslipId}")
 	public String deletePayslip(@PathVariable Integer payslipId) {
 		return payslipService.deletePayslip(payslipId);
 	}

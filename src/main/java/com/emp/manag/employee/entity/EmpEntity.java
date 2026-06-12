@@ -9,7 +9,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.emp.manag.schedule.entity.AttendanceEntity;
 import com.emp.manag.schedule.entity.ShiftEntity;
-import com.emp.manag.user.entity.UserEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -43,9 +42,11 @@ public class EmpEntity {
 	@Column(name ="employee_Code", unique = true)
 	private String employeeCode; // Unique code for each employee, e.g., EMP001, EMP002
 
-	@OneToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "user_id")
-	private UserEntity user; // Association with UserEntity, can be null for non-employee users
+	@Column(name="phone_number")
+	private String phonenumber;
+	
+	@Column(name = "company_email")
+	private String companyemail;
 	
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "shift_id")

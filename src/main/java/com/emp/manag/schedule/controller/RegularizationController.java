@@ -49,10 +49,17 @@ public class RegularizationController {
 	public String deleteRegularizationById(@PathVariable Integer regularizationId) {
 		return service.deleteById(regularizationId);
 	}
-	
+
+	@GetMapping("/getRegularizationbyId{regularizationId}")
+	public RegularizationEntity getById(@PathVariable Integer regularizationId) {
+
+		return service.getById(regularizationId);
+
+	}
+
 	@GetMapping("/getAllRegularization")
-	public List<RegularizationEntity> getAllRegularization () {
+	public List<RegularizationEntity> getAllRegularization() {
 		return service.getAllRegularization();
-		
+
 	}
 }

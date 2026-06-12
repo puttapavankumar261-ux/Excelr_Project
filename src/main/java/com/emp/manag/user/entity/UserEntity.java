@@ -7,7 +7,6 @@ import java.util.List;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.emp.manag.employee.entity.EmpEntity;
 import com.emp.manag.jobboard.entity.JobApplicationEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -34,11 +33,7 @@ public class UserEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "user_id", nullable = false, updatable = false)
 	private Integer userId;
-		
-	@JsonIgnore
-	@OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	private EmpEntity employee; // Association with EmpEntity, can be null for non-employee users
-	
+				
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	private List<UserEducationEntity> userEducation;
 	

@@ -14,8 +14,6 @@ import com.emp.manag.employee.entity.EmpEntity.EmploymentStatus;
 import com.emp.manag.employee.repo.EmpRepo;
 import com.emp.manag.schedule.entity.ShiftEntity;
 import com.emp.manag.schedule.repo.ShiftRepo;
-import com.emp.manag.user.entity.UserEntity;
-import com.emp.manag.user.repo.UserRepo;
 
 @Service
 @Transactional(rollbackFor = Exception.class)
@@ -23,10 +21,7 @@ public class EmpService {
 
 	@Autowired
 	private EmpRepo empRepo;
-
-	@Autowired
-	private UserRepo userRepo;
-
+	
 	@Autowired
 	private ShiftRepo shiftRepo;
 
@@ -56,11 +51,13 @@ public class EmpService {
 
 		validateManagerHierarchy(employeeId, updatedEmployee.getManager());
 
-		existingEmployee.setUser(updatedEmployee.getUser());
 		existingEmployee.setManager(updatedEmployee.getManager());
 		existingEmployee.setShift(updatedEmployee.getShift());
 		attachEmployeeRelations(existingEmployee);
 
+		existingEmployee.setEmployeename(updatedEmployee.getEmployeename());
+		existingEmployee.setCompanyemail(updatedEmployee.getCompanyemail());
+		existingEmployee.setPhonenumber(updatedEmployee.getPhonenumber());
 		existingEmployee.setImage(updatedEmployee.getImage());		
 		existingEmployee.setRole(updatedEmployee.getRole());
 		existingEmployee.setJoiningDate(updatedEmployee.getJoiningDate());
@@ -135,13 +132,6 @@ public class EmpService {
 	}
 
 	private void attachEmployeeRelations(EmpEntity employee) {
-
-		if (employee.getUser() != null && employee.getUser().getUserId() != null) {
-			Integer userId = employee.getUser().getUserId();
-			UserEntity user = userRepo.findById(userId)
-					.orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-			employee.setUser(user);
-		}
 
 		if (employee.getManager() != null && employee.getManager().getEmployeeid() != null) {
 			Integer managerId = employee.getManager().getEmployeeid();

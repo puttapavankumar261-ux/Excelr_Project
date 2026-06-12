@@ -18,8 +18,7 @@ public class UserService {
 
 	public UserEntity saveUser(UserEntity user) {
 
-		validateUser(user);
-		attachUserRelations(user);
+		validateUser(user);	
 
 		user.setStatus(UserEntity.UserStatus.ACTIVE);
 
@@ -38,22 +37,22 @@ public class UserService {
 				.orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
 
 		existingUser.setName(updatedUser.getName());
-		existingUser.setImage(updatedUser.getImage());		
+		existingUser.setImage(updatedUser.getImage());
 		existingUser.setGender(updatedUser.getGender());
-		
+
 		existingUser.setFatherName(updatedUser.getFatherName());
 		existingUser.setMotherName(updatedUser.getMotherName());
-		
+
 		existingUser.setState(updatedUser.getState());
 		existingUser.setCity(updatedUser.getCity());
 		existingUser.setCountry(updatedUser.getCountry());
 		existingUser.setCurrentaddress(updatedUser.getCurrentaddress());
 		existingUser.setPermanentAddress(updatedUser.getPermanentAddress());
-				
+
 		existingUser.setMaritalStatus(updatedUser.getMaritalStatus());
 		existingUser.setStatus(updatedUser.getStatus());
 		existingUser.setPincode(updatedUser.getPincode());
-		
+
 		existingUser.setDateOfBirth(updatedUser.getDateOfBirth());
 		existingUser.setPlaceofBirth(updatedUser.getPlaceofBirth());
 		existingUser.setAge(updatedUser.getAge());
@@ -123,9 +122,4 @@ public class UserService {
 		}
 	}
 
-	private void attachUserRelations(UserEntity user) {
-		if (user.getEmployee() != null) {
-			user.getEmployee().setUser(user);
-		}
-	}
 }

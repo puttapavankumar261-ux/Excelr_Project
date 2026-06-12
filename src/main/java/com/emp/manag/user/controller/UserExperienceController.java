@@ -27,12 +27,12 @@ public class UserExperienceController {
 		return experienceService.saveExperience(experience);
 	}
 
-	@PutMapping("/updateexperience/{experienceId}")
+	@PutMapping("/updateexperience/${experienceId}")
 	public String updateExperience(@PathVariable Integer experienceId, @RequestBody UserExperienceEntity updatedExperience) {
 		return experienceService.updateExperience(experienceId, updatedExperience);
 	}
 	
-	@GetMapping("/getexperience/{experienceId}")
+	@GetMapping("/getexperience/${experienceId}")
 	public UserExperienceEntity getExperienceById(@PathVariable Integer experienceId) {
 		return experienceService.getExperienceById(experienceId);
 	}
