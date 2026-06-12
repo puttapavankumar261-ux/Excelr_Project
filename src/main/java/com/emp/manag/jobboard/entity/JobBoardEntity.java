@@ -27,7 +27,7 @@ public class JobBoardEntity {
 	@Column(name = "job_Board_id", nullable = false)
 	private Integer jobBoardId;
 	
-	@OneToMany(mappedBy = "job")
+	@OneToMany(mappedBy = "jobBoard")
 	private List<AssessmentEntity> assessments;
 		
 	@Column(name = "job_title")

@@ -25,11 +25,11 @@ public class AssessmentService {
 
 		validateAssessment(assessment);
 
-		Integer jobId = assessment.getJob().getJobBoardId();
+		Integer jobBoardId = assessment.getJobBoard().getJobBoardId();
 
-		JobBoardEntity job = jobBoardRepo.findById(jobId)
-				.orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
-		assessment.setJob(job);
+		JobBoardEntity job = jobBoardRepo.findById(jobBoardId)
+				.orElseThrow(() -> new RuntimeException("Job not found with id: " + jobBoardId));
+		assessment.setJobBoard(job);
 		return assessmentRepository.save(assessment);
 	}
 
@@ -49,7 +49,7 @@ public class AssessmentService {
 				.orElseThrow(() -> new RuntimeException("Assessment not found with id: " + assessmentId));
 
 		existingAssessment.setFeedback(updatedassessment.getFeedback());
-		existingAssessment.setJob(updatedassessment.getJob());
+		existingAssessment.setJobBoard(updatedassessment.getJobBoard());
 		existingAssessment.setAssessmentResult(updatedassessment.getAssessmentResult());
 
 		assessmentRepository.save(existingAssessment);
@@ -92,7 +92,7 @@ public class AssessmentService {
 		if (assessment.getFeedback() == null || assessment.getFeedback().isEmpty()) {
 			throw new RuntimeException("Feedback is required");
 		}
-		if (assessment.getJob() == null || assessment.getJob().getJobBoardId() == null) {
+		if (assessment.getJobBoard() == null || assessment.getJobBoard().getJobBoardId() == null) {
 			throw new RuntimeException("Valid Job is required");
 		}
 

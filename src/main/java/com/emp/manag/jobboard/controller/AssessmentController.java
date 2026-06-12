@@ -27,12 +27,12 @@ public class AssessmentController {
 		return assessmentService.save(assessment);
 	}
 
-	@PutMapping("/UpdateAssessment/${assessmentId}")
+	@PutMapping("/UpdateAssessment/{assessmentId}")
 	public String updateAssessment(@PathVariable Integer assessmentId, @RequestBody AssessmentEntity updatedAssessment) {
 		return assessmentService.updateAssessment(assessmentId, updatedAssessment);
 	}
 
-	@DeleteMapping("/DeleteAssessment/${assessmentId}")
+	@DeleteMapping("/DeleteAssessment/{assessmentId}")
 	public String deleteAssessment(@PathVariable Integer assessmentId) {
 		return assessmentService.deleteAssessment(assessmentId);
 	}
@@ -42,7 +42,7 @@ public class AssessmentController {
 		return assessmentService.deleteAllAssessments();
 	}
 
-	@GetMapping("/GetAssessmentById/${assessmentId}")
+	@GetMapping("/GetAssessmentById/{assessmentId}")
 	public AssessmentEntity getAssessmentById(@PathVariable Integer assessmentId) {
 		return assessmentService.getAssessmentById(assessmentId);
 	}

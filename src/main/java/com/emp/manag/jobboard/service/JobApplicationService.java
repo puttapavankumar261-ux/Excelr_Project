@@ -48,16 +48,16 @@ public class JobApplicationService {
 		validateCreateApplication(application);
 
 		Integer userId = application.getUser().getUserId();
-		Integer jobId = application.getJobBoard().getJobBoardId();
+		Integer jobBoardId = application.getJobBoard().getJobBoardId();
 
-		if (applicationRepo.existsByUserUserIdAndJobBoardJobId(userId, jobId)) {
+		if (applicationRepo.existsByUserUserIdAndJobBoardJobBoardId(userId, jobBoardId)) {
 			throw new RuntimeException("User has already applied for this job");
 		}
 
 		UserEntity user = userRepo.findById(userId)
 				.orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
-		JobBoardEntity job = jobBoardRepo.findById(jobId)
-				.orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
+		JobBoardEntity job = jobBoardRepo.findById(jobBoardId)
+				.orElseThrow(() -> new RuntimeException("Job not found with id: " + jobBoardId));
 
 		if (job.getApplicationDeadline() != null && job.getApplicationDeadline().isBefore(LocalDateTime.now())) {
 			throw new RuntimeException("Application deadline has passed for this job");
@@ -70,7 +70,7 @@ public class JobApplicationService {
 
 		JobApplicationEntity savedApplication = applicationRepo.save(application);
 
-		List<AssessmentEntity> assessments = assessmentRepo.findByJobJobId(jobId);
+		List<AssessmentEntity> assessments = assessmentRepo.findByJobBoardJobBoardId(jobBoardId);
 
 		if (!assessments.isEmpty()) {
 		    AssessmentEntity assessment = assessments.get(0);
@@ -127,14 +127,14 @@ public class JobApplicationService {
 		return applicationRepo.findByUserUserId(userId);
 	}
 
-	public List<JobApplicationEntity> getApplicationsByJob(Integer jobId) {
-		if (jobId == null) {
+	public List<JobApplicationEntity> getApplicationsByJob(Integer jobBoardId) {
+		if (jobBoardId == null) {
 			throw new RuntimeException("Job ID is required");
 		}
-		if (!jobBoardRepo.existsById(jobId)) {
-			throw new RuntimeException("Job not found with id: " + jobId);
+		if (!jobBoardRepo.existsById(jobBoardId)) {
+			throw new RuntimeException("Job not found with id: " + jobBoardId);
 		}
-		return applicationRepo.findByJobBoardJobId(jobId);
+		return applicationRepo.findByJobBoardJobBoardId(jobBoardId);
 	}
 
 	public List<JobApplicationEntity> getApplicationsByStatus(CandidateStatus status) {

@@ -77,7 +77,7 @@ public class UserAssessmentService {
 	    /*
 	     * Verify assessment belongs to same job
 	     */
-	    if (!assessment.getJob().getJobBoardId()
+	    if (!assessment.getJobBoard().getJobBoardId()
 	            .equals(application.getJobBoard().getJobBoardId())) {
 
 	        throw new RuntimeException("Assessment does not belong to the application's job");

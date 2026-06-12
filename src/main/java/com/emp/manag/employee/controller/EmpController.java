@@ -29,7 +29,7 @@ public class EmpController {
 		return service.saveEmployee(employee);
 	}
 
-	@PutMapping("/Update/${employeeId}")
+	@PutMapping("/Update/{employeeId}")
 	public String updateEmployee(@PathVariable Integer employeeId, @RequestBody EmpEntity employee) {
 		System.out.println("Employee Data Updated");
 		return service.updateEmployee(employeeId, employee);
@@ -41,7 +41,7 @@ public class EmpController {
 
 	}
 
-	@GetMapping("/EmployeeById/${employeeId}")
+	@GetMapping("/EmployeeById/{employeeId}")
 	public EmpEntity getEmployeeById(@PathVariable Integer employeeId) {
 		return service.getEmployeeById(employeeId);
 

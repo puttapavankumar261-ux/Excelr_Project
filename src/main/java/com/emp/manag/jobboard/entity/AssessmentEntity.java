@@ -29,8 +29,8 @@ public class AssessmentEntity {
 	private Integer assessmentId;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "job_id")
-	private JobBoardEntity job;
+	@JoinColumn(name = "job_Board_id")
+	private JobBoardEntity jobBoard;
 
 	@Column(name = "assessment_name")
 	private String assessmentName;

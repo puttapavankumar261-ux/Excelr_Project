@@ -31,17 +31,17 @@ public class UserLoginController {
 		return loginService.saveLogin(loginEntity);
 	}
 	
-	@PutMapping("/updatelogindetails/${loginId}")
+	@PutMapping("/updatelogindetails/{loginId}")
 	public String updateLoginDetails(@PathVariable Integer loginId, @RequestBody UserLoginEntity updatedLogin) {
 		return loginService.updateLogin(loginId, updatedLogin);
 	}
 	
-	@DeleteMapping("/deletelogindetails/${loginId}")
+	@DeleteMapping("/deletelogindetails/{loginId}")
 	public String deleteLoginById(@PathVariable Integer loginId) {
 		return loginService.deleteLogin(loginId);
 	}
 	
-	@GetMapping("/getlogindetails/${loginId}")
+	@GetMapping("/getlogindetails/{loginId}")
 	public UserLoginEntity getLoginDetails(@PathVariable Integer loginId) {
 		return loginService.getLoginById(loginId);
 	}

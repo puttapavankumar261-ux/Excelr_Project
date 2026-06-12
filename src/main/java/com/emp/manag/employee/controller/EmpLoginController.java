@@ -31,12 +31,12 @@ public class EmpLoginController {
 		return empLoginService.saveLogin(login);
 	}
 
-	@PutMapping("/updatelogin/${loginId}")
+	@PutMapping("/updatelogin/{loginId}")
 	public String updateLogin(@PathVariable Integer loginId, @RequestBody EmpLoginEntity login) {
 		return empLoginService.updateLogin(loginId, login);
 	}
 
-	@GetMapping("/getlogin/${loginId}")
+	@GetMapping("/getlogin/{loginId}")
 	public EmpLoginEntity getLoginById(@PathVariable Integer loginId) {
 		return empLoginService.getLoginById(loginId);
 	}
@@ -51,7 +51,7 @@ public class EmpLoginController {
 		return empLoginService.getAllLogins();
 	}
 
-	@DeleteMapping("/deletelogin/${loginId}")
+	@DeleteMapping("/deletelogin/{loginId}")
 	public String deleteLogin(@PathVariable Integer loginId) {
 		return empLoginService.deleteLogin(loginId);
 	}

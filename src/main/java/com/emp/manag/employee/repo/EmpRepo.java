@@ -8,5 +8,4 @@ import com.emp.manag.employee.entity.EmpEntity;
 @Repository
 public interface EmpRepo extends JpaRepository<EmpEntity, Integer> {
 
-	boolean existsByUserUserId(Integer userId);
 }

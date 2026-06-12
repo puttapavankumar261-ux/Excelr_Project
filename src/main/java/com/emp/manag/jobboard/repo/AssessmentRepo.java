@@ -10,7 +10,7 @@ import com.emp.manag.jobboard.entity.AssessmentEntity;
 @Repository
 public interface AssessmentRepo extends JpaRepository<AssessmentEntity, Integer> {
 	
-	    List<AssessmentEntity> findByJobJobId(Integer jobId);
+	List<AssessmentEntity> findByJobBoardJobBoardId(Integer jobBoardId);
 	
 
 }

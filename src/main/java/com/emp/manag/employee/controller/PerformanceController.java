@@ -27,24 +27,24 @@ public class PerformanceController {
 		return performanceService.savePerformance(performance);
 	}
 
-	@PostMapping("/generateperformance/${employeeId}/{year}/{month}")
+	@PostMapping("/generateperformance/{employeeId}/{year}/{month}")
 	public PerformanceEntity generatePerformance(@PathVariable Integer employeeId,
 			@PathVariable Integer year, @PathVariable Integer month) {
 		return performanceService.generatePerformanceFromMonthlySummary(employeeId, year, month);
 	}
 
-	@PutMapping("/updateperformance/${performanceId}")
+	@PutMapping("/updateperformance/{performanceId}")
 	public PerformanceEntity updatePerformance(@PathVariable Integer performanceId,
 			@RequestBody PerformanceEntity performance) {
 		return performanceService.updatePerformance(performanceId, performance);
 	}
 
-	@GetMapping("/getperformance/${performanceId}")
+	@GetMapping("/getperformance/{performanceId}")
 	public PerformanceEntity getPerformanceById(@PathVariable Integer performanceId) {
 		return performanceService.getPerformanceById(performanceId);
 	}
 
-	@GetMapping("/getemployeeperformance/${employeeId}")
+	@GetMapping("/getemployeeperformance/{employeeId}")
 	public PerformanceEntity getPerformanceByEmployee(@PathVariable Integer employeeId) {
 		return performanceService.getPerformanceByEmployee(employeeId);
 	}
@@ -54,7 +54,7 @@ public class PerformanceController {
 		return performanceService.getAllPerformances();
 	}
 
-	@DeleteMapping("/deleteperformance/${performanceId}")
+	@DeleteMapping("/deleteperformance/{performanceId}")
 	public String deletePerformance(@PathVariable Integer performanceId) {
 		return performanceService.deletePerformance(performanceId);
 	}
