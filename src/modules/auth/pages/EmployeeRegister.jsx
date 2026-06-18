@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { saveEmployee, saveLogin } from "../services/setupService";
+import "../styles/Login.css";
 
 function EmployeeRegister() {
   const navigate = useNavigate();

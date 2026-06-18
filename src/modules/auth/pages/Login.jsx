@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  FiArrowRight,
+  FiBriefcase,
+  FiCheckCircle,
+  FiLock,
+  FiShield,
+  FiUser,
+  FiUserPlus,
+} from "react-icons/fi";
 import AdminSetup from "./AdminSetup";
 
 import { employeeLogin } from "../services/authService";
-
-
 
 import "../styles/Login.css";
 
@@ -17,10 +24,17 @@ function Login() {
   });
 
   const [showAdminSetup, setShowAdminSetup] = useState(false);
-
   const [loading, setLoading] = useState(false);
-
   const [error, setError] = useState("");
+
+  const features = [
+    "Employee management",
+    "Attendance tracking",
+    "Payroll automation",
+    "Recruitment portal",
+    "Performance analytics",
+    "Leave management",
+  ];
 
   const handleChange = (e) => {
     setLoginData({
@@ -68,7 +82,9 @@ function Login() {
       console.error("Login Error:", err);
 
       if (err.code === "ECONNREFUSED" || err.message?.includes("ECONNREFUSED")) {
-        setError("Backend server is not running on http://127.0.0.1:8080. Start the backend first.");
+        setError(
+          "Backend server is not running on http://127.0.0.1:8080. Start the backend first.",
+        );
       } else if (err.response) {
         setError(err.response.data.message || "Invalid username or password");
       } else {
@@ -87,26 +103,29 @@ function Login() {
 
   return (
     <>
-
       <section className="hero-section">
-        <div className="container">
-          <div className="row align-items-center">
-            {/* LEFT SECTION */}
+        <div className="login-shell container">
+          <div className="row align-items-center g-5">
             <div className="col-lg-7">
-              <h1 className="hero-title">Employee Management System</h1>
+              <div className="hero-copy">
+                <span className="hero-eyebrow">
+                  <FiBriefcase /> HRMS Workspace
+                </span>
 
-              <p className="hero-description">
-                Manage employees, attendance, payroll, recruitment and workforce
-                analytics from one powerful platform.
-              </p>
+                <h1 className="hero-title">Employee Management System</h1>
 
-              <div className="feature-list">
-                <div>✔ Employee Management</div>
-                <div>✔ Attendance Tracking</div>
-                <div>✔ Payroll Automation</div>
-                <div>✔ Recruitment Portal</div>
-                <div>✔ Performance Analytics</div>
-                <div>✔ Leave Management</div>
+                <p className="hero-description">
+                  Manage employees, attendance, payroll, recruitment and
+                  workforce analytics from one focused platform.
+                </p>
+
+                <div className="feature-list">
+                  {features.map((feature) => (
+                    <div key={feature}>
+                      <FiCheckCircle /> {feature}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <img
@@ -116,62 +135,77 @@ function Login() {
               />
             </div>
 
-            {/* LOGIN CARD */}
             <div className="col-lg-5">
               <div className="login-card">
                 <div className="text-center mb-4">
                   <img src="/ems-logo.png" alt="EMS" className="login-logo" />
 
-                  <h2 className="mt-3">Welcome Back</h2>
+                  <h2 className="mt-3">Welcome back</h2>
 
-                  <p className="text-muted">Login to continue</p>
+                  <p className="text-muted">
+                    Sign in to continue to your portal.
+                  </p>
                 </div>
 
-                <input
-                  type="text"
-                  name="username"
-                  className="form-control mb-3"
-                  placeholder="Username"
-                  value={loginData.username}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyPress}
-                />
+                <label className="input-label" htmlFor="username">
+                  Username
+                </label>
+                <div className="input-with-icon mb-3">
+                  <FiUser />
+                  <input
+                    id="username"
+                    type="text"
+                    name="username"
+                    className="form-control"
+                    placeholder="Enter username"
+                    value={loginData.username}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyPress}
+                  />
+                </div>
 
-                <input
-                  type="password"
-                  name="password"
-                  className="form-control mb-3"
-                  placeholder="Password"
-                  value={loginData.password}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyPress}
-                />
+                <label className="input-label" htmlFor="password">
+                  Password
+                </label>
+                <div className="input-with-icon mb-3">
+                  <FiLock />
+                  <input
+                    id="password"
+                    type="password"
+                    name="password"
+                    className="form-control"
+                    placeholder="Enter password"
+                    value={loginData.password}
+                    onChange={handleChange}
+                    onKeyDown={handleKeyPress}
+                  />
+                </div>
 
                 {error && <div className="alert alert-danger">{error}</div>}
 
                 <button
-                  className="btn btn-primary w-100"
+                  className="btn btn-primary login-primary-btn w-100"
                   onClick={handleLogin}
                   disabled={loading}
                 >
-                  {loading ? "Logging In..." : "Login"}
+                  {loading ? "Logging in..." : "Login"} <FiArrowRight />
                 </button>
 
-                <div className="text-center mt-4">
+                <div className="account-actions mt-4">
                   <small className="text-muted">First time using EMS?</small>
 
-                  {/* <button
-                    className="btn btn-outline-success w-100 mt-2"
-                    onClick={() => navigate("/register")}
-                  >
-                    Create Employee Account
-                  </button> */}
-
                   <button
-                    className="btn btn-outline-primary w-100 mt-2"
+                    className="btn btn-outline-primary w-100"
                     onClick={() => setShowAdminSetup(true)}
                   >
-                    Create Admin Account
+                    <FiShield /> Create Admin Account
+                  </button>
+
+                  <button
+                    className="btn btn-outline-success w-100"
+                    onClick={() => navigate("/register")}
+                  >
+                    <FiUserPlus /> Create Employee Account
                   </button>
                 </div>
               </div>
@@ -179,6 +213,7 @@ function Login() {
           </div>
         </div>
       </section>
+
       {showAdminSetup && (
         <div className="admin-modal-overlay">
           <div
@@ -194,9 +229,10 @@ function Login() {
           </div>
         </div>
       )}
+
       <footer className="footer-section">
         <div className="container text-center">
-          © 2026 Employee Management System | All Rights Reserved
+          Copyright 2026 Employee Management System | All Rights Reserved
         </div>
       </footer>
     </>

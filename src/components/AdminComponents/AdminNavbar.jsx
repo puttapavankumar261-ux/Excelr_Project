@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { FiChevronDown, FiMenu } from "react-icons/fi";
 import "../../styles/AdminNavbar.css";
 
 function AdminNavbar() {
@@ -36,7 +37,6 @@ function AdminNavbar() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     sessionStorage.removeItem("user");
-
     navigate("/login");
   };
 
@@ -47,7 +47,6 @@ function AdminNavbar() {
 
         <div>
           <h5 className="system-title">Employee Management System</h5>
-
           <small className="system-subtitle">Admin Portal</small>
         </div>
       </div>
@@ -56,26 +55,25 @@ function AdminNavbar() {
         type="button"
         className="mobile-menu-toggle"
         onClick={() => setMobileMenuOpen((prev) => !prev)}
+        aria-label="Toggle admin navigation"
       >
-        ☰
+        <FiMenu />
       </button>
 
       <ul className={`navbar-menu ${mobileMenuOpen ? "open" : ""}`}>
-        {/* Dashboard */}
         <li>
           <NavLink to="/admin" onClick={closeMenu}>
             Dashboard
           </NavLink>
         </li>
 
-        {/* Employee */}
         <li className="admin-dropdown">
           <button
             type="button"
             className="menu-btn"
             onClick={() => toggleMenu("employee")}
           >
-            Employee ▾
+            Employee <FiChevronDown />
           </button>
 
           {openMenu === "employee" && (
@@ -95,14 +93,13 @@ function AdminNavbar() {
           )}
         </li>
 
-        {/* Attendance */}
         <li className="admin-dropdown">
           <button
             type="button"
             className="menu-btn"
             onClick={() => toggleMenu("attendance")}
           >
-            Attendance ▾
+            Attendance <FiChevronDown />
           </button>
 
           {openMenu === "attendance" && (
@@ -130,14 +127,13 @@ function AdminNavbar() {
           )}
         </li>
 
-        {/* Leave */}
         <li className="admin-dropdown">
           <button
             type="button"
             className="menu-btn"
             onClick={() => toggleMenu("leave")}
           >
-            Leave ▾
+            Leave <FiChevronDown />
           </button>
 
           {openMenu === "leave" && (
@@ -153,14 +149,13 @@ function AdminNavbar() {
           )}
         </li>
 
-        {/* Payroll */}
         <li className="admin-dropdown">
           <button
             type="button"
             className="menu-btn"
             onClick={() => toggleMenu("payroll")}
           >
-            Payroll ▾
+            Payroll <FiChevronDown />
           </button>
 
           {openMenu === "payroll" && (
@@ -184,14 +179,13 @@ function AdminNavbar() {
           )}
         </li>
 
-        {/* Users */}
         <li className="admin-dropdown">
           <button
             type="button"
             className="menu-btn"
             onClick={() => toggleMenu("users")}
           >
-            Users ▾
+            Users <FiChevronDown />
           </button>
 
           {openMenu === "users" && (
