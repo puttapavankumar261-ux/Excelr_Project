@@ -160,20 +160,9 @@ public class UserLoginService {
 	    if (request.getPassword() == null
 	            || request.getPassword().trim().isEmpty()) {
 
-<<<<<<< HEAD
 	        throw new RuntimeException(
 	                "Password is required");
 	    }
-=======
-		session.setMaxInactiveInterval(SESSION_TIMEOUT_SECONDS);
-		session.setAttribute("principalType", "USER");
-		session.setAttribute("userLoginId", login.getUserLoginId());
-		session.setAttribute("userId", login.getUser().getUserId());
-		session.setAttribute("username", login.getUsername());
-		session.setAttribute("role", login.getRole());
-		session.setAttribute("loginAt", loginAt);
-		
->>>>>>> f759ccff23d20de1a3e7334cfca05632bc51aea1
 
 	    UserLoginEntity login =
 	            loginRepo.findByUsername(

@@ -31,83 +31,69 @@ import lombok.Setter;
 @Entity
 @Table(name = "shift")
 public class ShiftEntity {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "shift_id")
-	private Integer shiftid;
-<<<<<<< HEAD
 
-	@OneToMany(mappedBy = "shift")
-	@JsonIgnore
-	private List<EmpEntity> employees;
-	
-	@OneToMany(mappedBy = "shift")
-	@JsonIgnore
-	private List<AttendanceEntity> attendances;
-=======
-	
-	@Column(name = "shift_name", nullable = false)
-	private String shiftName;
->>>>>>> f759ccff23d20de1a3e7334cfca05632bc51aea1
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "shift_id")
+    private Integer shiftid;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "shift_type", nullable = false)
-	private ShiftType shiftType;
+    @Column(name = "shift_name", nullable = false)
+    private String shiftName;
 
-	public enum ShiftType {
-	    MORNING,
-	    NIGHT,
-	    US,
-	    ROTATIONAL
-	}	
+    @Enumerated(EnumType.STRING)
+    @Column(name = "shift_type", nullable = false)
+    private ShiftType shiftType;
 
-	// Shift Hierarchy (Parent)
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "parent_shift_id")
-	@JsonIgnore
-	private ShiftEntity parentShift;
+    public enum ShiftType {
+        MORNING,
+        NIGHT,
+        US,
+        ROTATIONAL
+    }
 
-	@OneToMany(mappedBy = "parentShift")
-	@JsonIgnore
-	private List<ShiftEntity> childShifts;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_shift_id")
+    @JsonIgnore
+    private ShiftEntity parentShift;
 
-	@Column(name = "start_time", nullable = false)
-	private LocalTime startTime;
+    @OneToMany(mappedBy = "parentShift")
+    @JsonIgnore
+    private List<ShiftEntity> childShifts;
 
-	@Column(name = "end_time", nullable = false)
-	private LocalTime endTime;
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
 
-	@Column(name = "cross_day", nullable = false)
-	private Boolean crossDay; // true for night shifts
+    @Column(name = "end_time", nullable = false)
+    private LocalTime endTime;
 
-	// ---- Grace & Rules ----
+    @Column(name = "cross_day", nullable = false)
+    private Boolean crossDay;
 
-	@Column(name = "late_grace_minutes", nullable = false)
-	private Integer lateGraceMinutes;
+    @Column(name = "late_grace_minutes", nullable = false)
+    private Integer lateGraceMinutes;
 
-	@Column(name = "early_exit_grace_minutes")
-	private Integer earlyExitGraceMinutes;
+    @Column(name = "early_exit_grace_minutes")
+    private Integer earlyExitGraceMinutes;
 
-	@Column(name = "min_work_hours")
-	private BigDecimal minWorkHours;
+    @Column(name = "min_work_hours")
+    private BigDecimal minWorkHours;
 
-	// ---- Metadata ----
+    @Column(name = "active", nullable = false)
+    private Boolean active;
 
-	@Column(name = "active", nullable = false)
-	private Boolean active;
-	
-	@OneToMany(mappedBy = "shift")
-	private List<EmpEntity> employees;
-	
-	@OneToMany(mappedBy = "shift")
-	private List<AttendanceEntity> attendances;
+    @OneToMany(mappedBy = "shift")
+    @JsonIgnore
+    private List<EmpEntity> employees;
 
-	@CreationTimestamp
-	@Column(name = "created_at", insertable = false, updatable = false)
-	private LocalDateTime createdAt;
+    @OneToMany(mappedBy = "shift")
+    @JsonIgnore
+    private List<AttendanceEntity> attendances;
 
-	@UpdateTimestamp
-	@Column(name = "updated_at", insertable = false)
-	private LocalDateTime updatedAt;
+    @CreationTimestamp
+    @Column(name = "created_at", insertable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", insertable = false)
+    private LocalDateTime updatedAt;
 }

@@ -3,12 +3,15 @@ package com.emp.manag.employee.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.emp.manag.schedule.entity.MonthlyAttendanceSummaryEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -19,6 +22,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
@@ -36,15 +40,15 @@ public class PayslipEntity {
 	@Column(name = "payslip_id")
 	private Integer payslipId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "employee_id", nullable = false)
 	private EmpEntity employee;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "payroll_id", nullable = false)
 	private PayrollEntity payroll;
 
-	@OneToOne(fetch = FetchType.LAZY)
+	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "monthly_summary_id")
 	private MonthlyAttendanceSummaryEntity monthlySummary;
 
@@ -53,6 +57,12 @@ public class PayslipEntity {
 
 	@Column(name = "month", nullable = false)
 	private Integer month;
+	
+	@Column(
+	        name = "payslip_number",
+	        unique = true,
+	        nullable = false)
+	private String payslipNumber;
 
 	@Column(name = "pay_period_start", nullable = false)
 	private LocalDate payPeriodStart;
@@ -126,7 +136,7 @@ public class PayslipEntity {
 
 	@Column(name = "approved_on")
 	private LocalDateTime approvedOn;
-
+	
 	@Column(name = "paid_on")
 	private LocalDate paidOn;
 

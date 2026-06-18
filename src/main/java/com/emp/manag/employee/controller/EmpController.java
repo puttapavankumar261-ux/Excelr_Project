@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.emp.manag.config.dto.EmployeeOnboardingRequest;
 import com.emp.manag.employee.entity.EmpEntity;
 import com.emp.manag.employee.service.EmpService;
 
@@ -27,6 +28,13 @@ public class EmpController {
 		System.out.println("===== REQUEST RECEIVED =====");
 		System.out.println("Employee Data Saved");
 		return service.saveEmployee(employee);
+	}
+	
+	@PostMapping("/onboardemployee")
+	public String onboardEmployee(
+	        @RequestBody EmployeeOnboardingRequest request) {
+
+	    return service.onboardEmployee(request);
 	}
 
 	@PutMapping("/Update/{employeeId}")
@@ -47,10 +55,25 @@ public class EmpController {
 	}
 
 	@DeleteMapping("/DeleteEmp/{employeeId}")
-	public String deleteEmployee(@PathVariable Integer employeeId) {
-		return service.deleteEmployee(employeeId);
-	}
+	public String deleteEmployee(
+	        @PathVariable Integer employeeId) {
 
+	    System.out.println(
+	            "DELETE REQUEST FOR EMPLOYEE : "
+	            + employeeId);
+
+	    try {
+
+	        return service.deleteEmployee(
+	                employeeId);
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        throw e;
+	    }
+	}
 	@DeleteMapping("/DeleteAllEmp")
 	public String deleteAllEmployees() {
 		return service.deleteAllEmployees();

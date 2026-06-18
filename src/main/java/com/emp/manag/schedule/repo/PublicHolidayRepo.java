@@ -1,6 +1,7 @@
 package com.emp.manag.schedule.repo;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,5 +17,10 @@ public interface PublicHolidayRepo extends JpaRepository<PublicHolidayEntity, In
 	Optional<PublicHolidayEntity> findByPublicholidayDate(LocalDate publicHolidayDate);
 
 	int countByPublicholidayDateBetween(LocalDate startDate, LocalDate endDate);
+	
+	List<PublicHolidayEntity>
+    findByPublicholidayDateBetween(
+            LocalDate startDate,
+            LocalDate endDate);
 
 }

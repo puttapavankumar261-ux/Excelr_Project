@@ -24,7 +24,8 @@ public class PayrollService {
 
 	@Autowired
 	private EmpRepo empRepo;
-	
+
+	@Autowired
 	private TaxSlabRepo taxRepo;
 
 	public PayrollEntity savePayroll(PayrollEntity payroll) {
@@ -35,7 +36,18 @@ public class PayrollService {
 		
 		Integer taxId = payroll.getTaxSlab().getTaxid();
 		Integer employeeId = payroll.getEmployee().getEmployeeid();
-		
+		PayrollEntity existingPayroll =
+		        payrollRepo
+		        .findByEmployeeEmployeeidAndPayrollMonth(
+		                employeeId,
+		                payroll.getPayrollMonth())
+		        .orElse(null);
+
+		if (existingPayroll != null) {
+
+		    throw new RuntimeException(
+		            "Payroll already generated for this employee and month");
+		}
 		EmpEntity employee = empRepo.findById(employeeId)
 				.orElseThrow(() -> new RuntimeException("Employee not found with ID: " + employeeId));
 		TaxSlabEntity tax = taxRepo.findById(taxId)
@@ -60,9 +72,7 @@ public class PayrollService {
 		if (payrollId == null) {
 			throw new RuntimeException("Payroll ID is required");
 		}
-
 		validatePayroll(updatedPayroll);
-
 		PayrollEntity existingPayroll = getPayrollById(payrollId);
 
 		existingPayroll.setEmployee(updatedPayroll.getEmployee());
@@ -82,6 +92,15 @@ public class PayrollService {
 		existingPayroll.setApprovedBy(updatedPayroll.getApprovedBy());
 
 		attachEmployee(existingPayroll);
+		Integer taxId = existingPayroll.getTaxSlab().getTaxid();
+
+		TaxSlabEntity tax = taxRepo.findById(taxId)
+		        .orElseThrow(() ->
+		            new RuntimeException(
+		                "Tax slab not found with ID: " + taxId
+		            ));
+
+		existingPayroll.setTaxSlab(tax);
 		recalculatePayroll(existingPayroll);
 
 		return payrollRepo.save(existingPayroll);
@@ -168,7 +187,11 @@ public class PayrollService {
 		if (payroll.getPayrollMonth() == null) {
 			throw new RuntimeException("Payroll month is required");
 		}
+		if (payroll.getTaxSlab() == null ||
+			    payroll.getTaxSlab().getTaxid() == null) {
 
+			    throw new RuntimeException("Tax slab is required");
+			}
 		validateAmount(payroll.getBasicSalary(), "Basic salary");
 		validateAmount(payroll.getHra(), "HRA");
 		validateAmount(payroll.getAllowances(), "Allowances");
@@ -178,6 +201,11 @@ public class PayrollService {
 		validateAmount(payroll.getEsi(), "ESI");
 		validateAmount(payroll.getProfessionalTax(), "Professional tax");
 		validateAmount(payroll.getIncomeTax(), "Income tax");
+		System.out.println("Employee = " + payroll.getEmployee());
+		System.out.println("TaxSlab = " + payroll.getTaxSlab());
+		System.out.println("Bonus = " + payroll.getBonus());
+		System.out.println("IncomeTax = " + payroll.getIncomeTax());
+		System.out.println("PF = " + payroll.getPf());
 	}
 
 	private void validateAmount(BigDecimal amount, String fieldName) {
@@ -201,18 +229,20 @@ public class PayrollService {
 
 	private void recalculatePayroll(PayrollEntity payroll) {
 
-		BigDecimal grossSalary = payroll.getBasicSalary()
-				.add(payroll.getHra())
-				.add(payroll.getAllowances())
-				.add(payroll.getBonus());
+	    BigDecimal grossSalary = payroll.getBasicSalary()
+	            .add(payroll.getHra())
+	            .add(payroll.getAllowances())
+	            .add(payroll.getBonus());
 
-		BigDecimal totalDeductions = payroll.getDeductions()
-				.add(payroll.getPf())
-				.add(payroll.getEsi())
-				.add(payroll.getProfessionalTax())
-				.add(payroll.getIncomeTax());
+	    BigDecimal netSalary =
+	            grossSalary.subtract(
+	                    payroll.getDeductions());
 
-		payroll.setGrossSalary(grossSalary);
-		payroll.setNetSalary(grossSalary.subtract(totalDeductions));
+	    if (netSalary.compareTo(BigDecimal.ZERO) < 0) {
+	        netSalary = BigDecimal.ZERO;
+	    }
+
+	    payroll.setGrossSalary(grossSalary);
+	    payroll.setNetSalary(netSalary);
 	}
 }

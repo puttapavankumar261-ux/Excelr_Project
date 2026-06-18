@@ -29,13 +29,18 @@ public class TaxSlabController {
 	}
 
 	@PutMapping("/updatetaxslab/{taxid}")
-	public TaxSlabEntity updateTaxSlab(@PathVariable Integer taxSlabId, @RequestBody TaxSlabEntity taxSlab) {
-		return taxSlabService.updateTaxSlab(taxSlabId, taxSlab);
+	public TaxSlabEntity updateTaxSlab(
+	        @PathVariable("taxid") Integer taxid,
+	        @RequestBody TaxSlabEntity taxSlab) {
+
+	    return taxSlabService.updateTaxSlab(taxid, taxSlab);
 	}
 
 	@GetMapping("/gettaxslab/{taxid}")
-	public TaxSlabEntity getTaxSlabById(@PathVariable Integer taxSlabId) {
-		return taxSlabService.getTaxSlabById(taxSlabId);
+	public TaxSlabEntity getTaxSlabById(
+	        @PathVariable("taxid") Integer taxid) {
+
+	    return taxSlabService.getTaxSlabById(taxid);
 	}
 
 	@GetMapping("/getalltaxslabs")
@@ -49,7 +54,9 @@ public class TaxSlabController {
 	}
 
 	@DeleteMapping("/deletetaxslab/{taxid}")
-	public String deleteTaxSlab(@PathVariable Integer taxSlabId) {
-		return taxSlabService.deleteTaxSlab(taxSlabId);
+	public String deleteTaxSlab(
+	        @PathVariable("taxid") Integer taxid) {
+
+	    return taxSlabService.deleteTaxSlab(taxid);
 	}
 }

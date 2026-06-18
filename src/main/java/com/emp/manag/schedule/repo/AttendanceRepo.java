@@ -46,4 +46,6 @@ public interface AttendanceRepo extends JpaRepository<AttendanceEntity, Integer>
 	findByEmployeeEmployeeidAndAttendanceDate(
 	        Integer employeeId,
 	        LocalDate attendanceDate);
+	
+	List<AttendanceEntity> findByEmployeeEmployeeid(Integer employeeId);
 }

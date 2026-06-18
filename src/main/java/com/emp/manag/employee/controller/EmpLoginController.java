@@ -3,6 +3,7 @@ package com.emp.manag.employee.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,13 +78,14 @@ public class EmpLoginController {
 		return empLoginService.logout(session);
 	}
 	
-	@PutMapping("/change-password")
-	public String changePassword(
+	@PostMapping("/change-password")
+	public ResponseEntity<String> changePassword(
 	        @RequestBody ChangePasswordRequest request) {
 
-	    return empLoginService.changePassword(
-	            request.getUsername(),
-	            request.getCurrentPassword(),
-	            request.getNewPassword());
+	    return ResponseEntity.ok(
+	            empLoginService.changePassword(
+	                    request.getUsername(),
+	                    request.getCurrentPassword(),
+	                    request.getNewPassword()));
 	}
 }

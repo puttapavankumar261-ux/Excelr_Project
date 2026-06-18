@@ -8,6 +8,7 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 import com.emp.manag.schedule.dto.AttendanceDTO;
+import com.emp.manag.schedule.dto.AttendanceSummaryDTO;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,7 +37,7 @@ import com.emp.manag.schedule.repo.ShiftRepo;
 public class AttendanceService {
 
 	@Autowired
-	private AttendanceRepo attendanceRepo;
+	private AttendanceRepo attendanceRepo1;
 
 	@Autowired
 	private EmpRepo empRepo;
@@ -52,6 +53,7 @@ public class AttendanceService {
 
 	@Autowired
 	private EmpWeekOffRepo empWeekOffRepo;
+
 
 	public AttendanceEntity saveAttendance(AttendanceEntity attendance) {
 
@@ -78,7 +80,7 @@ public class AttendanceService {
 		LocalDate attendanceDate = attendance.getAttendanceDate() == null ? LocalDate.now()
 				: attendance.getAttendanceDate();
 
-		if (attendanceRepo.existsByEmployeeEmployeeidAndAttendanceDate(employeeId, attendanceDate)) {
+		if (attendanceRepo1.existsByEmployeeEmployeeidAndAttendanceDate(employeeId, attendanceDate)) {
 			throw new RuntimeException("Attendance already exists for this employee on " + attendanceDate);
 		}
 
@@ -91,7 +93,7 @@ public class AttendanceService {
 		attachRelations(attendance);
 		recalculateAttendance(attendance);
 
-		return attendanceRepo.save(attendance);
+		return attendanceRepo1.save(attendance);
 	}
 
 	public String updateAttendance(Integer attendanceId, AttendanceEntity updatedAttendance) {
@@ -104,7 +106,7 @@ public class AttendanceService {
 			throw new RuntimeException("Attendance details are required");
 		}
 
-		AttendanceEntity existingAttendance = attendanceRepo.findById(attendanceId)
+		AttendanceEntity existingAttendance = attendanceRepo1.findById(attendanceId)
 				.orElseThrow(() -> new RuntimeException("Attendance record not found with ID: " + attendanceId));
 
 		existingAttendance.setPunchInTime(updatedAttendance.getPunchInTime());
@@ -130,7 +132,7 @@ public class AttendanceService {
 		attachRelations(existingAttendance);
 		recalculateAttendance(existingAttendance);
 
-		attendanceRepo.save(existingAttendance);
+		attendanceRepo1.save(existingAttendance);
 
 		return "Attendance record updated successfully.";
 	}
@@ -141,12 +143,12 @@ public class AttendanceService {
 			throw new RuntimeException("Attendance ID is required");
 		}
 
-		return attendanceRepo.findById(attendanceId)
+		return attendanceRepo1.findById(attendanceId)
 				.orElseThrow(() -> new RuntimeException("Attendance record not found with ID: " + attendanceId));
 	}
 
 	public List<AttendanceEntity> getAllAttendances() {
-		return attendanceRepo.findAll();
+		return attendanceRepo1.findAll();
 	}
 
 	public List<AttendanceEntity> getEmployeeMonthlyAttendance(Integer employeeId, Integer year, Integer month) {
@@ -157,20 +159,20 @@ public class AttendanceService {
 
 		YearMonth yearMonth = validateYearMonth(year, month);
 
-		return attendanceRepo.findByEmployeeEmployeeidAndAttendanceDateBetween(employeeId, yearMonth.atDay(1),
+		return attendanceRepo1.findByEmployeeEmployeeidAndAttendanceDateBetween(employeeId, yearMonth.atDay(1),
 				yearMonth.atEndOfMonth());
 	}
 
 	public AttendanceEntity deleteById(Integer attendanceId) {
 
 		AttendanceEntity existingAttendance = getAttendanceById(attendanceId);
-		attendanceRepo.delete(existingAttendance);
+		attendanceRepo1.delete(existingAttendance);
 
 		return existingAttendance;
 	}
 
 	public String deleteAllAttendances() {
-		attendanceRepo.deleteAll();
+		attendanceRepo1.deleteAll();
 		return "All attendance records have been deleted.";
 	}
 
@@ -411,7 +413,7 @@ public class AttendanceService {
 	
 	public List<AttendanceDTO> getAllAttendanceDTO() {
 
-	    return attendanceRepo.findAll()
+	    return attendanceRepo1.findAll()
 	            .stream()
 	            .map(this::convertToDTO)
 	            .collect(Collectors.toList());
@@ -446,11 +448,12 @@ public class AttendanceService {
 
 	        dto.setEmployeeName(
 	                attendance.getEmployee()
-	                        .getEmployeeName());
+	                        .getEmployeename());
 
 	        dto.setDepartment(
-	                attendance.getEmployee()
-	                        .getDepartment());
+	                attendance.getEmployee().getDepartment() != null
+	                        ? attendance.getEmployee().getDepartment().name()
+	                        : null);
 	    }
 
 	    return dto;
@@ -458,7 +461,7 @@ public class AttendanceService {
 	
 	public Integer getPresentToday() {
 
-	    return attendanceRepo
+	    return attendanceRepo1
 	            .countByAttendanceDateAndAttendanceStatus(
 	                    LocalDate.now(),
 	                    AttendanceStatus.PRESENT);
@@ -466,7 +469,7 @@ public class AttendanceService {
 
 	public Integer getAbsentToday() {
 
-	    return attendanceRepo
+	    return attendanceRepo1
 	            .countByAttendanceDateAndAttendanceStatus(
 	                    LocalDate.now(),
 	                    AttendanceStatus.ABSENT);
@@ -474,7 +477,7 @@ public class AttendanceService {
 
 	public Integer getLeaveToday() {
 
-	    return attendanceRepo
+	    return attendanceRepo1
 	            .countByAttendanceDateAndAttendanceStatus(
 	                    LocalDate.now(),
 	                    AttendanceStatus.LEAVE);
@@ -482,7 +485,7 @@ public class AttendanceService {
 
 	public Integer getWeekOffToday() {
 
-	    return attendanceRepo
+	    return attendanceRepo1
 	            .countByAttendanceDateAndAttendanceStatus(
 	                    LocalDate.now(),
 	                    AttendanceStatus.WEEK_OFF);
@@ -511,32 +514,78 @@ public class AttendanceService {
 
 	    return summary;
 	}
-	private void removeLeaveAttendance(
-	        LeaveEntity leave) {
+	
+	public AttendanceSummaryDTO getAttendanceSummary(
+	        Integer employeeId) {
 
-	    LocalDate current =
-	            leave.getLeaveStartDate();
+	    AttendanceSummaryDTO dto =
+	            new AttendanceSummaryDTO();
 
-	    while (!current.isAfter(
-	            leave.getLeaveEndDate())) {
+	    List<AttendanceEntity> attendances =
+	            attendanceRepo1
+	                    .findByEmployeeEmployeeid(employeeId);
 
-	        attendanceRepo
-	                .findByEmployeeEmployeeidAndAttendanceDate(
-	                        leave.getEmployee()
-	                                .getEmployeeid(),
-	                        current)
-	                .ifPresent(attendance -> {
+	    int present = 0;
+	    int leave = 0;
+	    int absent = 0;
+	    int publicHolidays = 0;
+	    int workingDays = 0;
 
-	                    if (attendance.getAttendanceStatus()
-	                            == AttendanceStatus.LEAVE) {
+	    for (AttendanceEntity attendance : attendances) {
 
-	                        attendanceRepo.delete(
-	                                attendance);
-	                    }
-	                });
+	        AttendanceStatus status =
+	                attendance.getAttendanceStatus();
 
-	        current =
-	                current.plusDays(1);
+	        if (status == null) {
+	            continue;
+	        }
+
+	        switch (status) {
+
+	        case PRESENT:
+	            present++;
+	            workingDays++;
+	            break;
+
+	        case HALF_DAY:
+	            present++;
+	            workingDays++;
+	            break;
+
+	        case LEAVE:
+	            leave++;
+	            workingDays++;
+	            break;
+
+	        case ABSENT:
+	            absent++;
+	            workingDays++;
+	            break;
+
+	        case HOLIDAY:
+	        case WEEK_OFF:
+	            publicHolidays++;
+	            break;
+
+	        default:
+	            break;
+	        }
 	    }
+
+	    double attendancePercentage =
+	            workingDays == 0
+	                    ? 0
+	                    : ((present + leave) * 100.0)
+	                    / workingDays;
+
+	    dto.setWorkingDays(workingDays);
+	    dto.setPresentDays(present);
+	    dto.setLeaveDays(leave);
+	    dto.setAbsentDays(absent);
+	    dto.setPublicHolidays(publicHolidays);
+	    dto.setAttendancePercentage(
+	            Math.round(attendancePercentage * 100.0) / 100.0);
+
+	    return dto;
 	}
 }

@@ -9,13 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.emp.manag.config.dto.EmployeeOnboardingRequest;
 import com.emp.manag.employee.entity.EmpEntity;
-<<<<<<< HEAD
+import com.emp.manag.employee.entity.EmpEntity.EmploymentStatus;
 import com.emp.manag.employee.entity.EmpLoginEntity;
 import com.emp.manag.employee.repo.EmpLoginRepo;
-=======
-import com.emp.manag.employee.entity.EmpEntity.EmploymentStatus;
->>>>>>> f759ccff23d20de1a3e7334cfca05632bc51aea1
 import com.emp.manag.employee.repo.EmpRepo;
 import com.emp.manag.schedule.entity.ShiftEntity;
 import com.emp.manag.schedule.repo.ShiftRepo;
@@ -33,57 +31,19 @@ public class EmpService {
 	@Autowired
 	private EmpLoginRepo loginRepo;
 	
+	
+	
 	public EmpEntity saveEmployee(EmpEntity employee) {
 
-<<<<<<< HEAD
 	    validateEmployee(employee);
+	    validateManagerHierarchy(employee.getEmployeeid(), employee.getManager());
 	    attachEmployeeRelations(employee);
 
-	    if (employee.getEmploymentStatus() == null
-	            || employee.getEmploymentStatus().trim().isEmpty()) {
-	        employee.setEmploymentStatus("ACTIVE");
-	    }
-=======
-		validateEmployee(employee);
-		validateManagerHierarchy(employee.getEmployeeid(), employee.getManager());
-		attachEmployeeRelations(employee);
-
-		if (employee.getEmploymentStatus() == null) {
-			employee.setEmploymentStatus(EmploymentStatus.ACTIVE);
-		}
->>>>>>> f759ccff23d20de1a3e7334cfca05632bc51aea1
-
-	    EmpEntity savedEmployee = empRepo.save(employee);
-
-	    if (!loginRepo.existsByEmployeeEmployeeid(savedEmployee.getEmployeeid())) {
-
-	        EmpLoginEntity login = new EmpLoginEntity();
-
-	        login.setEmployee(savedEmployee);
-
-	        String employeeName = savedEmployee.getEmployeeName().trim();
-
-	        String firstName = employeeName.split(" ")[0];
-
-	        String username = firstName + savedEmployee.getEmployeeid();
-
-	        String tempPassword = firstName + "@123";
-
-	        login.setUsername(username);
-	        login.setPasswordHash(tempPassword);
-	        login.setRole("EMPLOYEE");
-	        login.setStatus("ACTIVE");
-
-	        loginRepo.save(login);
-
-	        System.out.println("==================================");
-	        System.out.println("Employee Login Created");
-	        System.out.println("Username : " + username);
-	        System.out.println("Password : " + tempPassword);
-	        System.out.println("==================================");
+	    if (employee.getEmploymentStatus() == null) {
+	        employee.setEmploymentStatus(EmploymentStatus.ACTIVE);
 	    }
 
-	    return savedEmployee;
+	    return empRepo.save(employee);
 	}
 
 	public String updateEmployee(Integer employeeId, EmpEntity updatedEmployee) {
@@ -115,7 +75,25 @@ public class EmpService {
 		existingEmployee.setEmploymentType(updatedEmployee.getEmploymentType());
 		existingEmployee.setEmploymentStatus(updatedEmployee.getEmploymentStatus());
 		existingEmployee.setWorkLocation(updatedEmployee.getWorkLocation());
+		existingEmployee.setBankName(
+		        updatedEmployee.getBankName());
 
+		existingEmployee.setAccountHolderName(
+		        updatedEmployee.getAccountHolderName());
+
+		existingEmployee.setAccountNumber(
+		        updatedEmployee.getAccountNumber());
+
+		existingEmployee.setIfscCode(
+		        updatedEmployee.getIfscCode());
+		existingEmployee.setBasicSalary(
+		        updatedEmployee.getBasicSalary());
+
+		existingEmployee.setHra(
+		        updatedEmployee.getHra());
+
+		existingEmployee.setAllowances(
+		        updatedEmployee.getAllowances());
 		empRepo.save(existingEmployee);
 		return "Employee record updated successfully";
 	}
@@ -134,29 +112,78 @@ public class EmpService {
 				.orElseThrow(() -> new RuntimeException("Employee not found with ID: " + employeeId));
 	}
 
+	@Transactional
 	public String deleteEmployee(Integer employeeId) {
 
-	    EmpEntity employee = getEmployeeById(employeeId);
+	    try {
 
-	    List<EmpLoginEntity> logins = loginRepo.findAll();
+	        EmpEntity employee = empRepo.findById(employeeId)
+	                .orElseThrow(() ->
+	                        new RuntimeException("Employee not found"));
 
-	    for (EmpLoginEntity login : logins) {
-	        if (login.getEmployee() != null &&
-	            login.getEmployee().getEmployeeid().equals(employeeId)) {
+	        System.out.println("Deleting Employee ID = " + employeeId);
 
-	            loginRepo.delete(login);
-	            break;
-	        }
+	        empRepo.delete(employee);
+
+	        empRepo.flush();
+
+	        System.out.println("Delete Successful");
+
+	        return "Employee deleted successfully";
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        throw new RuntimeException(
+	                "DELETE FAILED -> "
+	                + e.getClass().getName()
+	                + " -> "
+	                + e.getMessage());
 	    }
-
-	    empRepo.delete(employee);
-
-	    return "Employee record deleted successfully";
 	}
 
 	public String deleteAllEmployees() {
 		empRepo.deleteAll();
 		return "All employee records deleted successfully";
+	}
+	
+	public String onboardEmployee(
+	        EmployeeOnboardingRequest request) {
+
+	    EmpEntity employee = request.getEmployee();
+
+	    validateEmployee(employee);
+
+	    attachEmployeeRelations(employee);
+
+	    // Save Employee
+	    EmpEntity savedEmployee = empRepo.save(employee);
+
+	    // Create Login Automatically
+	    EmpLoginEntity login = new EmpLoginEntity();
+
+	    login.setEmployee(savedEmployee);
+
+	    // Username = Company Email
+	    login.setUsername(
+	            savedEmployee.getCompanyemail());
+
+	    // Default Password = Company Email
+	    login.setPasswordHash(
+	            savedEmployee.getCompanyemail());
+
+	    // Role from Employee
+	    login.setRole(
+	            savedEmployee.getRole().name());
+
+	    // Active by default
+	    login.setStatus("ACTIVE");
+
+	    // Save Login
+	    loginRepo.save(login);
+
+	    return "Employee onboarded successfully. Username and password created automatically.";
 	}
 
 	private void validateEmployee(EmpEntity employee) {

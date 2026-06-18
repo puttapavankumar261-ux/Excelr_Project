@@ -8,6 +8,7 @@ import java.util.List;
 
 import java.util.stream.Collectors;
 import com.emp.manag.schedule.dto.LeaveDTO;
+import com.emp.manag.schedule.dto.LeaveSummaryDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -455,11 +456,12 @@ public class LeaveService {
 
 	        dto.setEmployeeName(
 	                leave.getEmployee()
-	                        .getEmployeeName());
+	                        .getEmployeename());
 
 	        dto.setDepartment(
-	                leave.getEmployee()
-	                        .getDepartment());
+	                leave.getEmployee().getDepartment() != null
+	                        ? leave.getEmployee().getDepartment().name()
+	                        : null);
 	    }
 
 	    dto.setLeaveType(
@@ -534,5 +536,55 @@ public class LeaveService {
 
 	    return leaveRepo.save(
 	            leave);
+	}
+	
+	public LeaveSummaryDTO getLeaveSummary(
+	        Integer employeeId) {
+
+	    LeaveSummaryDTO dto =
+	            new LeaveSummaryDTO();
+
+	    List<LeaveEntity> leaves =
+	            leaveRepo.findByEmployeeEmployeeid(
+	                    employeeId);
+
+	    dto.setTotalLeaves(
+	            leaves.size());
+
+	    dto.setPendingLeaves(
+	            (int) leaves.stream()
+	                    .filter(l ->
+	                            l.getApprovalStatus()
+	                            == ApprovalStatus.PENDING_TEAM_LEAD
+	                            ||
+	                            l.getApprovalStatus()
+	                            == ApprovalStatus.PENDING_MANAGER
+	                            ||
+	                            l.getApprovalStatus()
+	                            == ApprovalStatus.PENDING_HR)
+	                    .count());
+
+	    dto.setApprovedLeaves(
+	            (int) leaves.stream()
+	                    .filter(l ->
+	                            l.getApprovalStatus()
+	                            == ApprovalStatus.APPROVED)
+	                    .count());
+
+	    dto.setRejectedLeaves(
+	            (int) leaves.stream()
+	                    .filter(l ->
+	                            l.getApprovalStatus()
+	                            == ApprovalStatus.REJECTED)
+	                    .count());
+
+	    dto.setCancelledLeaves(
+	            (int) leaves.stream()
+	                    .filter(l ->
+	                            l.getApprovalStatus()
+	                            == ApprovalStatus.CANCELLED)
+	                    .count());
+
+	    return dto;
 	}
 }

@@ -12,7 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.emp.manag.employee.entity.PayslipEntity;
+import com.emp.manag.employee.service.PayslipPdfService;
 import com.emp.manag.employee.service.PayslipService;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 @RestController
 @RequestMapping("/api/employee-management")
@@ -20,6 +24,9 @@ public class PayslipController {
 
 	@Autowired
 	private PayslipService payslipService;
+	
+	@Autowired
+	private PayslipPdfService pdfService;
 
 	@PostMapping("/generatepayslip/{employeeId}/{year}/{month}")
 	public PayslipEntity generatePayslip(@PathVariable Integer employeeId,
@@ -61,6 +68,24 @@ public class PayslipController {
 	@GetMapping("/getallpayslips")
 	public List<PayslipEntity> getAllPayslips() {
 		return payslipService.getAllPayslips();
+	}
+	
+	@GetMapping("/downloadpayslip/{payslipId}")
+	public ResponseEntity<byte[]>
+	downloadPayslip(
+	        @PathVariable Integer payslipId) {
+
+	    byte[] pdf =
+	            pdfService.generatePdf(
+	                    payslipId);
+
+	    return ResponseEntity.ok()
+	            .header(
+	                    HttpHeaders.CONTENT_DISPOSITION,
+	                    "attachment; filename=payslip.pdf")
+	            .contentType(
+	                    MediaType.APPLICATION_PDF)
+	            .body(pdf);
 	}
 
 	@DeleteMapping("/deletepayslip/{payslipId}")

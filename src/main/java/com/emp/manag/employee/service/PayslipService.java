@@ -52,8 +52,20 @@ public class PayslipService {
 		EmpEntity employee = empRepo.findById(employeeId)
 				.orElseThrow(() -> new RuntimeException("Employee not found with ID: " + employeeId));
 
-		PayrollEntity payroll = payrollRepo.findTopByEmployeeEmployeeidOrderByPayrollMonthDesc(employeeId)
-				.orElseThrow(() -> new RuntimeException("Payroll not found for employee ID: " + employeeId));
+		LocalDate payrollMonth =
+		        LocalDate.of(year, month, 1);
+
+		PayrollEntity payroll =
+		        payrollRepo
+		        .findByEmployeeEmployeeidAndPayrollMonth(
+		                employeeId,
+		                payrollMonth)
+		        .orElseThrow(() ->
+		                new RuntimeException(
+		                        "Payroll not found for "
+		                        + year
+		                        + "-"
+		                        + month));
 
 		MonthlyAttendanceSummaryEntity summary = monthlySummaryService.generateMonthlySummary(employeeId, year, month);
 
@@ -63,6 +75,15 @@ public class PayslipService {
 		payslip.setMonthlySummary(summary);
 		payslip.setYear(year);
 		payslip.setMonth(month);
+		String payslipNumber =
+		        "PS-"
+		        + year
+		        + String.format("%02d", month)
+		        + "-"
+		        + employeeId;
+
+		payslip.setPayslipNumber(
+		        payslipNumber);
 		payslip.setPayPeriodStart(yearMonth.atDay(1));
 		payslip.setPayPeriodEnd(yearMonth.atEndOfMonth());
 		recalculatePayslip(payslip, payroll, summary);
@@ -189,12 +210,9 @@ public class PayslipService {
 		BigDecimal perDaySalary = monthlyGross.divide(BigDecimal.valueOf(workingDays), 2, RoundingMode.HALF_UP);
 		BigDecimal lopDeduction = perDaySalary.multiply(lopDays).setScale(2, RoundingMode.HALF_UP);
 
-		BigDecimal totalDeductions = lopDeduction
-				.add(payroll.getDeductions())
-				.add(payroll.getPf())
-				.add(payroll.getEsi())
-				.add(payroll.getProfessionalTax())
-				.add(payroll.getIncomeTax());
+		BigDecimal totalDeductions =
+		        lopDeduction
+		        .add(payroll.getDeductions());
 
 		payslip.setWorkingDays(workingDays);
 		payslip.setPaidDays(paidDays);
@@ -211,8 +229,14 @@ public class PayslipService {
 		payslip.setIncomeTax(payroll.getIncomeTax());
 		payslip.setOtherDeductions(payroll.getDeductions());
 		payslip.setTotalDeductions(totalDeductions);
-		payslip.setNetPay(monthlyGross.subtract(totalDeductions).max(BigDecimal.ZERO));
-	}
+		BigDecimal payableGross =
+		        monthlyGross.subtract(
+		                lopDeduction);
+
+		payslip.setNetPay(
+		        payableGross
+		        .subtract(payroll.getDeductions())
+		        .max(BigDecimal.ZERO));	}
 
 	private YearMonth validateYearMonth(Integer year, Integer month) {
 

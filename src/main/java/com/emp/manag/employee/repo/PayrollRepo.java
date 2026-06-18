@@ -12,9 +12,14 @@ import com.emp.manag.employee.entity.PayrollEntity;
 @Repository
 public interface PayrollRepo extends JpaRepository<PayrollEntity, Integer> {
 
-	List<PayrollEntity> findByEmployeeEmployeeid(Integer employeeId);
+    List<PayrollEntity> findByEmployeeEmployeeid(Integer employeeId);
 
-	Optional<PayrollEntity> findTopByEmployeeEmployeeidOrderByPayrollMonthDesc(Integer employeeId);
+    Optional<PayrollEntity>
+    findTopByEmployeeEmployeeidOrderByPayrollMonthDesc(
+            Integer employeeId);
 
-	boolean existsByEmployeeEmployeeidAndPayrollMonth(Integer employeeId, LocalDate payrollMonth);
+    Optional<PayrollEntity>
+    findByEmployeeEmployeeidAndPayrollMonth(
+            Integer employeeId,
+            LocalDate payrollMonth);
 }

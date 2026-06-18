@@ -57,6 +57,9 @@ public class EmpLoginEntity {
 	@Column(name = "status", nullable = false)
 	private String status; // Active/Inactive
 
+	@Column(name = "first_login")
+	private Boolean firstLogin = true;
+	
 	@CreationTimestamp
 	@Column(name = "created_on", updatable = false)
 	private LocalDateTime createdon;

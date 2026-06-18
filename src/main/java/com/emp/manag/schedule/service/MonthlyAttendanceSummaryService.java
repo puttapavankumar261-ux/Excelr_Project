@@ -17,7 +17,7 @@ import com.emp.manag.schedule.entity.MonthlyAttendanceSummaryEntity;
 import com.emp.manag.schedule.repo.AttendanceRepo;
 import com.emp.manag.schedule.repo.EmpWeekOffRepo;
 import com.emp.manag.schedule.repo.LeaveRepo;
-import com.emp.manag.schedule.repo.MonthlyAttendanceSummeryRepo;
+import com.emp.manag.schedule.repo.MonthlyAttendanceSummaryRepo;
 import com.emp.manag.schedule.repo.PublicHolidayRepo;
 
 @Service
@@ -25,7 +25,7 @@ import com.emp.manag.schedule.repo.PublicHolidayRepo;
 public class MonthlyAttendanceSummaryService {
 
 	@Autowired
-	private MonthlyAttendanceSummeryRepo monthlySummaryRepo;
+	private MonthlyAttendanceSummaryRepo monthlySummaryRepo;
 
 	@Autowired
 	private AttendanceRepo attendanceRepo;

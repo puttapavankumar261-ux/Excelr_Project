@@ -1,16 +1,20 @@
 package com.emp.manag.employee.entity;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.emp.manag.schedule.entity.AttendanceEntity;
+import com.emp.manag.schedule.entity.LeaveEntity;
+import com.emp.manag.schedule.entity.MonthlyAttendanceSummaryEntity;
 import com.emp.manag.schedule.entity.ShiftEntity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -26,192 +30,237 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
+@JsonIgnoreProperties({
+        "hibernateLazyInitializer",
+        "handler"
+})
 @Data
 @Entity
 @Table(name = "employee")
 public class EmpEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "employee_Id", nullable = false, unique = true, updatable = true)
-	private Integer employeeid; 
-	
-	@Column(name = "employee_name")
-	private String employeename;
-	
-	@Column(name ="employee_Code", unique = true)
-	private String employeeCode; // Unique code for each employee, e.g., EMP001, EMP002
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "employee_Id", nullable = false, unique = true)
+    private Integer employeeid;
 
-<<<<<<< HEAD
-	@JsonIgnore
-=======
-	@Column(name="phone_number")
-	private String phonenumber;
-	
-	@Column(name = "company_email")
-	private String companyemail;
-	
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "shift_id")
-	private ShiftEntity shift;	
+    @Column(name = "employee_name")
+    private String employeename;
 
-	@Column(name = "image")
-	private String image;
-	
-	// Employee → Manager
->>>>>>> f759ccff23d20de1a3e7334cfca05632bc51aea1
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "manager_id")
-	private EmpEntity manager;
+    @Column(name = "employee_Code", unique = true)
+    private String employeeCode;
 
-<<<<<<< HEAD
-	@JsonIgnore
-	@OneToMany(mappedBy = "manager")
-	private List<EmpEntity> subordinates;
-=======
-	// Manager → Subordinates
-	@OneToMany(mappedBy = "manager")	
-	private List<EmpEntity> teamMembers;
-	
-	@Enumerated(EnumType.STRING)
-	@Column(name = "role", nullable = false)
-	private EmployeeRole role;
->>>>>>> f759ccff23d20de1a3e7334cfca05632bc51aea1
+    @Column(name = "phone_number")
+    private String phonenumber;
 
-	public enum EmployeeRole {
-		ADMIN,
-		HR,
-		MANAGER,
-		TEAM_LEAD,
-		EMPLOYEE,
-		PROJECT_MANAGER,
-		RECRUITMENT_LEAD,
-		TEACHER_TRAINER,
-		FINANCE,
-		PAYROLL_ADMIN
-	}
+    @Column(name = "company_email")
+    private String companyemail;
 
-	@Column(name = "joining_date")
-	private LocalDate joiningDate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_id")
+    private ShiftEntity shift;
 
-	@Column(name = "resignation_date")
-	private LocalDate resignationDate;
-	
-	@Column(name = "work_location")
-	private String workLocation;
+    @Column(name = "image")
+    private String image;
 
-	// Designations show Seniority, Department shows which branch employee works,
-	// Role shows Functional Duty in which branch employee is working.
-	
-	@Enumerated(EnumType.STRING)
-	@Column(name = "department", nullable = false)
-	private Department department;
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    private EmpEntity manager;
 
-	public enum Department {
-		HR,
-		SALES,
-		CUSTOMER_SERVICE,
-		SOFTWARE,
-		FINANCE,
-		OPERATIONS,
-		RECRUITMENT,
-		TRAINING,
-		ADMIN,
-		MANAGEMENT
-	}
+    @JsonIgnore
+    @OneToMany(mappedBy = "manager")
+    private List<EmpEntity> subordinates;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "designation", nullable = false)
-	private JobLevel designation;
-	
-	public enum JobLevel {
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private EmployeeRole role;
 
-	    INTERN,
+    public enum EmployeeRole {
+        ADMIN,
+        HR,
+        MANAGER,
+        TEAM_LEAD,
+        EMPLOYEE,
+        PROJECT_MANAGER,
+        RECRUITMENT_LEAD,
+        TEACHER_TRAINER,
+        FINANCE,
+        PAYROLL_ADMIN
+    }
 
-	    TRAINEE,
+    @Column(name = "joining_date")
+    private LocalDate joiningDate;
 
-	    ASSOCIATE,
+    @Column(name = "resignation_date")
+    private LocalDate resignationDate;
 
-	    SENIOR_ASSOCIATE,
+    @Column(name = "work_location")
+    private String workLocation;
 
-	    SME,
-	    
-	    TRAINER,
+    @Column(name = "bank_name")
+    private String bankName;
 
-	    TEAM_LEAD,
+    @Column(name = "account_holder_name")
+    private String accountHolderName;
 
-	    ASSISTANT_MANAGER,
+    @Column(name = "account_number")
+    private String accountNumber;
 
-	    MANAGER,
+    @Column(name = "ifsc_code")
+    private String ifscCode;
 
-	    SENIOR_MANAGER,
+    @Column(name = "basic_salary")
+    private BigDecimal basicSalary;
 
-	    DIRECTOR,
+    @Column(name = "hra")
+    private BigDecimal hra;
 
-	    VICE_PRESIDENT,
+    @Column(name = "allowances")
+    private BigDecimal allowances;
 
-	    C_LEVEL_EXECUTIVE,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "department", nullable = false)
+    private Department department;
 
-	    CEO,
+    public enum Department {
+        HR,
+        SALES,
+        CUSTOMER_SERVICE,
+        SOFTWARE,
+        FINANCE,
+        OPERATIONS,
+        RECRUITMENT,
+        TRAINING,
+        ADMIN,
+        MANAGEMENT
+    }
 
-	    MANAGING_DIRECTOR,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "designation", nullable = false)
+    private JobLevel designation;
 
-	    CHAIRMAN
-	}
-	
-	@Enumerated(EnumType.STRING)
-	@Column(name = "employment_type", nullable = false)
-	private EmploymentType employmentType;
-	
-	public enum EmploymentType {
+    public enum JobLevel {
+        INTERN,
+        TRAINEE,
+        ASSOCIATE,
+        SENIOR_ASSOCIATE,
+        SME,
+        TRAINER,
+        TEAM_LEAD,
+        ASSISTANT_MANAGER,
+        MANAGER,
+        SENIOR_MANAGER,
+        DIRECTOR,
+        VICE_PRESIDENT,
+        C_LEVEL_EXECUTIVE,
+        CEO,
+        MANAGING_DIRECTOR,
+        CHAIRMAN
+    }
 
-	    FULL_TIME,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "employment_type", nullable = false)
+    private EmploymentType employmentType;
 
-	    PART_TIME,
+    public enum EmploymentType {
+        FULL_TIME,
+        PART_TIME,
+        CONTRACT,
+        INTERN,
+        FREELANCER
+    }
 
-	    CONTRACT,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "employment_status")
+    private EmploymentStatus employmentStatus;
 
-	    INTERN,
+    public enum EmploymentStatus {
+        ACTIVE,
+        NOTICE_PERIOD,
+        RESIGNED,
+        TERMINATED,
+        ABSCONDED
+    }
 
-	    FREELANCER
-	}
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
 
-	@Enumerated(EnumType.STRING)
-	private EmploymentStatus employmentStatus; // ACTIVE, EXITED, ABSCONDED, TERMINATED
-	
-	public enum EmploymentStatus {
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-	    ACTIVE,
+    /* ATTENDANCE */
 
-	    NOTICE_PERIOD,
+    @OneToMany(
+            mappedBy = "employee",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private List<AttendanceEntity> attendance;
 
-	    RESIGNED,
+    /* LOGIN */
 
-	    TERMINATED,
+    @OneToOne(
+            mappedBy = "employee",
+            fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private EmpLoginEntity login;
 
-	    ABSCONDED
-	}
+    /* KYC */
 
-	@CreationTimestamp
-	@Column(name = "created_at", updatable = false)
-	private LocalDateTime createdAt;
+    @OneToOne(
+            mappedBy = "employee",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private KycEntity kyc;
 
-	@UpdateTimestamp
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
+    /* SALARY STRUCTURE */
 
-	// columns joined with other tables//
+    @OneToOne(
+            mappedBy = "employee",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private SalaryStructureEntity salaryStructure;
 
-	@OneToMany(mappedBy = "employee", fetch = FetchType.EAGER)
-	@JsonIgnore
-	private List<AttendanceEntity> attendance;
+    /* LEAVES */
 
-	@OneToOne(mappedBy = "employee", fetch = FetchType.EAGER)
-	@JsonIgnore
-	private EmpLoginEntity login;
+    @OneToMany(
+            mappedBy = "employee",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private List<LeaveEntity> leaves;
 
-	@OneToOne(mappedBy = "employee", fetch = FetchType.LAZY)
-	@JsonIgnore
-	private KycEntity kyc;
+    /* MONTHLY ATTENDANCE SUMMARY */
 
+    @OneToMany(
+            mappedBy = "employee",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private List<MonthlyAttendanceSummaryEntity> monthlyAttendanceSummaries;
+
+    /* PAYROLL */
+
+    @OneToMany(
+            mappedBy = "employee",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonIgnore
+    private List<PayrollEntity> payrolls;
 }

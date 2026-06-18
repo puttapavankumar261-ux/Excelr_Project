@@ -214,6 +214,8 @@ public class EmpLoginService {
 
 	    login.setPasswordHash(newPassword);
 
+	    login.setFirstLogin(false);
+
 	    loginRepo.save(login);
 
 	    return "Password changed successfully";

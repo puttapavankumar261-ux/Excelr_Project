@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 import com.emp.manag.schedule.dto.AttendanceDTO;
+import com.emp.manag.schedule.dto.AttendanceSummaryDTO;
 import com.emp.manag.schedule.entity.AttendanceEntity;
 import com.emp.manag.schedule.repo.AttendanceRepo;
 import com.emp.manag.schedule.service.AttendanceService;
@@ -128,9 +129,11 @@ public class AttendanceController {
                 "SHOW TABLES");
     }
     
-    @GetMapping("/attendance-summary")
-    public Map<String, Integer> getAttendanceSummary() {
+    
+    @GetMapping("/attendance-summary/{employeeId}")
+    public AttendanceSummaryDTO getAttendanceSummary(
+            @PathVariable Integer employeeId) {
 
-        return service.getAttendanceSummary();
+        return service.getAttendanceSummary(employeeId);
     }
 }

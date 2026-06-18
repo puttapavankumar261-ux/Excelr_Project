@@ -26,59 +26,16 @@ import lombok.Data;
 @Table(name = "user_assessment")
 public class UserAssessmentEntity {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "user_assessment_id")
-	private Integer userAssessmentId;	
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_assessment_id")
+    private Integer userAssessmentId;
 
-	@Column(name = "score")
-	private Integer score;
+    @Column(name = "score")
+    private Integer score;
 
-	@Column(name = "passed")
-	private Boolean passed;
-
-	@Column(name = "session_started_at")
-	private LocalDateTime sessionStartedAt;
-
-	@Column(name = "session_ends_at")
-	private LocalDateTime sessionEndsAt;
-
-	@Column(name = "submitted_at")
-	private LocalDateTime submittedAt;
-
-	@Enumerated(EnumType.STRING)
-	@Column(name = "session_status")
-	private AssessmentSessionStatus sessionStatus;
-
-	public enum AssessmentSessionStatus {
-		ASSIGNED, IN_PROGRESS, SUBMITTED, EXPIRED
-	}
-
-	@Column(name = "assessment_date")
-	private LocalDateTime assessmentDate;
-	
-	@ManyToOne
-	@JoinColumn(name = "user_id")
-	private UserEntity user;
-
-	@ManyToOne
-	@JoinColumn(name = "job_id")
-	private JobApplicationEntity jobApplication;
-	
-	@ManyToOne(fetch = FetchType.EAGER)
-	@JoinColumn(name = "assessment_id")
-	private AssessmentEntity assessment;
-
-	@CreationTimestamp
-	@Column(name = "created_at", updatable = false)
-	private LocalDateTime createdAt;
-
-<<<<<<< HEAD
-	@Column(name = "passed")
+    @Column(name = "passed")
     private Boolean passed;
-
-    @Enumerated(EnumType.STRING)
-    private CandidateStatus status;
 
     @Column(name = "session_started_at")
     private LocalDateTime sessionStartedAt;
@@ -100,25 +57,26 @@ public class UserAssessmentEntity {
         EXPIRED
     }
 
+    @Column(name = "assessment_date")
+    private LocalDateTime assessmentDate;
+
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
     @ManyToOne
-    @JoinColumn(name = "job_application_id")
+    @JoinColumn(name = "job_id")
     private JobApplicationEntity jobApplication;
-    
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "assessment_id")
+    private AssessmentEntity assessment;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createAt;
-    
+    private LocalDateTime createdAt;
+
     @UpdateTimestamp
     @Column(name = "updated_at")
-    private LocalDateTime updateAt;
-=======
-	@UpdateTimestamp
-	@Column(name = "updated_at")
-	private LocalDateTime updatedAt;
->>>>>>> f759ccff23d20de1a3e7334cfca05632bc51aea1
-
+    private LocalDateTime updatedAt;
 }
