@@ -4,21 +4,28 @@ import AdminLayout from "../layouts/AdminLayout";
 
 import AdminDashboard from "../modules/dashboard/pages/AdminDashboard";
 import ModulePlaceholder from "../modules/dashboard/components/ModulePlaceholder";
+
+import AddEmployeeWizard from "../modules/employee/components/AddEmployeeWizard";
 import EmployeeList from "../modules/employee/pages/EmployeeList";
 import EmployeeDetails from "../modules/employee/pages/EmployeeDetails";
 import EditEmployee from "../modules/employee/pages/EditEmployee";
+
 import AttendanceHistory from "../modules/attendance/pages/AttendanceHistory";
 import MonthlySummary from "../modules/dashboard/pages/MonthlySummary";
 import SettingsPage from "../modules/dashboard/pages/SettingsPage";
 import AttendanceList from "../modules/attendance/pages/AttendanceList";
 import AttendanceSummary from "../modules/attendance/pages/AttendanceSummary";
 import Shifts from "../modules/attendance/pages/Shifts";
+
 import LeaveList from "../modules/leave/pages/LeaveList";
 import LeaveDetails from "../modules/leave/pages/LeaveDetails";
 import LeaveApproval from "../modules/leave/pages/LeaveApproval";
 import WeekOffs from "../modules/attendance/pages/WeekOffs";
 import Holidays from "../modules/holiday/pages/Holidays";
+
 import PayslipList from "../modules/payroll/pages/PayslipList";
+import PayslipDetails from "../modules/payroll/pages/PayslipDetails";
+import EditPayslip from "../modules/payroll/pages/EditPayslip";
 import Payroll from "../modules/payroll/pages/Payroll";
 import TaxSlabList from "../modules/tax/pages/TaxSlabList";
 import SalaryStructureList from "../modules/salary/pages/SalaryStructureList";
@@ -51,7 +58,6 @@ function AdminRoutes() {
             />
           }
         />
-
         {/* Schedule Module */}
         <Route path="leave" element={<LeaveList />} />
         <Route path="leave/details/:leaveId" element={<LeaveDetails />} />
@@ -79,7 +85,6 @@ function AdminRoutes() {
             />
           }
         />
-
         {/* User Module */}
         <Route
           path="users"
@@ -157,7 +162,6 @@ function AdminRoutes() {
             />
           }
         />
-
         {/* Common */}
         <Route
           path="reports"
@@ -178,28 +182,27 @@ function AdminRoutes() {
             />
           }
         />
+
         <Route path="settings" element={<SettingsPage />} />
 
         <Route path="employees" element={<EmployeeList />} />
+        <Route path="employees/add" element={<AddEmployeeWizard />} />
         <Route path="employees/view/:id" element={<EmployeeDetails />} />
         <Route path="employees/edit/:id" element={<EditEmployee />} />
+
         <Route path="payslips" element={<PayslipList />} />
+        <Route path="payslips/view/:id" element={<PayslipDetails />} />
+        <Route path="payslips/edit/:id" element={<EditPayslip />} />
+
         {/* =========================
              Attendance Module
             ========================= */}
-
         <Route path="attendance" element={<AttendanceList />} />
-
         <Route path="attendance-summary" element={<AttendanceSummary />} />
-
         <Route path="attendance/:id" element={<AttendanceHistory />} />
-
         <Route path="shifts" element={<Shifts />} />
-
         <Route path="weekoffs" element={<WeekOffs />} />
-
         <Route path="holidays" element={<Holidays />} />
-
         <Route
           path="regularization"
           element={

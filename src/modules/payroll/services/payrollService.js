@@ -5,14 +5,22 @@ export const getAllPayrolls = async () => {
 };
 
 export const getPayrollById = async (payrollId) => {
-  return await axiosClient.get(`/getpayroll/${payrollId}`);
+  return await axiosClient.get(
+    `/getpayroll/${payrollId}`
+  );
 };
 
 export const savePayroll = async (data) => {
-  return await axiosClient.post("/savepayroll", data);
+  return await axiosClient.post(
+    "/savepayroll",
+    data
+  );
 };
 
-export const updatePayroll = async (payrollId, data) => {
+export const updatePayroll = async (
+  payrollId,
+  data
+) => {
   return await axiosClient.put(
     `/updatepayroll/${payrollId}`,
     data
@@ -28,7 +36,9 @@ export const approvePayroll = async (
   );
 };
 
-export const deletePayroll = async (payrollId) => {
+export const deletePayroll = async (
+  payrollId
+) => {
   return await axiosClient.delete(
     `/deletepayroll/${payrollId}`
   );

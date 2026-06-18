@@ -15,6 +15,11 @@ function AddEmployeeModal({ onClose, onSuccess }) {
     employmentStatus: "ACTIVE",
     workLocation: "",
     managerId: "",
+
+    bankName: "",
+    accountHolderName: "",
+    accountNumber: "",
+    ifscCode: "",
   });
 
   useEffect(() => {
@@ -50,6 +55,11 @@ function AddEmployeeModal({ onClose, onSuccess }) {
         employmentType: employee.employmentType,
         employmentStatus: employee.employmentStatus,
         workLocation: employee.workLocation,
+
+        bankName: employee.bankName,
+        accountHolderName: employee.accountHolderName,
+        accountNumber: employee.accountNumber,
+        ifscCode: employee.ifscCode,
 
         manager: employee.managerId
           ? {
@@ -200,6 +210,42 @@ function AddEmployeeModal({ onClose, onSuccess }) {
             value={employee.workLocation}
             onChange={handleChange}
           />
+
+          <div className="border rounded p-3 mb-3 bg-light">
+            <h5 className="mb-3">Bank Information</h5>
+
+            <input
+              className="form-control mb-3"
+              placeholder="Bank Name"
+              name="bankName"
+              value={employee.bankName}
+              onChange={handleChange}
+            />
+
+            <input
+              className="form-control mb-3"
+              placeholder="Account Holder Name"
+              name="accountHolderName"
+              value={employee.accountHolderName}
+              onChange={handleChange}
+            />
+
+            <input
+              className="form-control mb-3"
+              placeholder="Account Number"
+              name="accountNumber"
+              value={employee.accountNumber}
+              onChange={handleChange}
+            />
+
+            <input
+              className="form-control mb-3"
+              placeholder="IFSC Code"
+              name="ifscCode"
+              value={employee.ifscCode}
+              onChange={handleChange}
+            />
+          </div>
 
           <select
             className="form-control mb-3"

@@ -10,9 +10,9 @@ const isNetworkFailure = (error) =>
 const mockEmployees = [
   {
     employeeid: 1,
-    employeeName: "Mock Employee",
+    employeename: "Mock Employee",
     designation: "Developer",
-    department: "IT",
+    department: "SOFTWARE",
     employmentStatus: "ACTIVE",
   },
 ];
@@ -37,20 +37,51 @@ export const getEmployeeById = async (id) => {
     return await axiosClient.get(`/EmployeeById/${id}`);
   } catch (error) {
     if (isNetworkFailure(error)) {
-      return { data: { ...mockEmployees[0], employeeid: Number(id) || 1 } };
+      return {
+        data: {
+          ...mockEmployees[0],
+          employeeid: Number(id) || 1,
+        },
+      };
     }
     throw error;
   }
 };
 
-/* ADD */
+/* ADD EMPLOYEE */
 
 export const addEmployee = async (employee) => {
   try {
     return await axiosClient.post("/Saveemp", employee);
   } catch (error) {
     if (isNetworkFailure(error)) {
-      return { data: { success: true, employee: employee } };
+      return {
+        data: {
+          success: true,
+          employee,
+        },
+      };
+    }
+    throw error;
+  }
+};
+
+/* ONBOARD EMPLOYEE */
+
+export const onboardEmployee = async (data) => {
+  try {
+    return await axiosClient.post(
+      "/onboardemployee",
+      data
+    );
+  } catch (error) {
+    if (isNetworkFailure(error)) {
+      return {
+        data: {
+          success: true,
+          onboardingData: data,
+        },
+      };
     }
     throw error;
   }
@@ -58,12 +89,23 @@ export const addEmployee = async (employee) => {
 
 /* UPDATE */
 
-export const updateEmployee = async (id, employee) => {
+export const updateEmployee = async (
+  id,
+  employee
+) => {
   try {
-    return await axiosClient.put(`/Update/${id}`, employee);
+    return await axiosClient.put(
+      `/Update/${id}`,
+      employee
+    );
   } catch (error) {
     if (isNetworkFailure(error)) {
-      return { data: { success: true, employee: employee } };
+      return {
+        data: {
+          success: true,
+          employee,
+        },
+      };
     }
     throw error;
   }
@@ -73,14 +115,23 @@ export const updateEmployee = async (id, employee) => {
 
 export const deleteEmployee = async (id) => {
   try {
-    return await axiosClient.delete(`/DeleteEmp/${id}`);
+    return await axiosClient.delete(
+      `/DeleteEmp/${id}`
+    );
   } catch (error) {
     if (isNetworkFailure(error)) {
-      return { data: { success: true, deletedId: id } };
+      return {
+        data: {
+          success: true,
+          deletedId: id,
+        },
+      };
     }
     throw error;
   }
 };
+
+/* ATTENDANCE */
 
 export const getAttendanceSummary = async (
   employeeId

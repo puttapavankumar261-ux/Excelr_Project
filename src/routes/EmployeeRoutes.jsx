@@ -9,6 +9,7 @@ import EmployeeLeave from "../modules/employee/pages/EmployeeLeave";
 import EmployeePayslips from "../modules/employee/pages/EmployeePayslips";
 import EmployeeSettings from "../modules/employee/pages/EmployeeSettings";
 import ChangePassword from "../modules/employee/pages/ChangePassword";
+import EmployeePayslipDetails from "../modules/employee/pages/EmployeePayslipDetails";
 
 function EmployeeRoutes() {
   return (
@@ -79,6 +80,7 @@ function EmployeeRoutes() {
       />
 
       <Route path="*" element={<Navigate to="dashboard" replace />} />
+      <Route path="payslips/view/:id" element={<EmployeePayslipDetails />} />
     </Routes>
   );
 }

@@ -10,40 +10,40 @@ function EmployeeTable({ employees, onView, onEdit, onDelete }) {
           <th>Role</th>
           <th>Status</th>
           <th>Location</th>
-          <th>Actions</th>
+          <th width="220">Actions</th>
         </tr>
       </thead>
 
       <tbody>
-        {employees && employees.length > 0 ? (
-          employees.map((emp) => (
-            <tr key={emp.employeeid}>
-              <td>{emp.employeeid}</td>
-              <td>{emp.employeename}</td>
-              <td>{emp.department}</td>
-              <td>{emp.designation}</td>
-              <td>{emp.role}</td>
-              <td>{emp.employmentStatus}</td>
-              <td>{emp.workLocation}</td>
+        {employees.length > 0 ? (
+          employees.map((employee) => (
+            <tr key={employee.employeeid}>
+              <td>{employee.employeeid}</td>
+              <td>{employee.employeename}</td>
+              <td>{employee.department}</td>
+              <td>{employee.designation}</td>
+              <td>{employee.role}</td>
+              <td>{employee.employmentStatus}</td>
+              <td>{employee.workLocation}</td>
 
               <td>
                 <button
                   className="btn btn-info btn-sm me-2"
-                  onClick={() => onView(emp.employeeid)}
+                  onClick={() => onView(employee.employeeid)}
                 >
                   View
                 </button>
 
                 <button
                   className="btn btn-warning btn-sm me-2"
-                  onClick={() => onEdit(emp.employeeid)}
+                  onClick={() => onEdit(employee.employeeid)}
                 >
                   Edit
                 </button>
 
                 <button
                   className="btn btn-danger btn-sm"
-                  onClick={() => onDelete(emp.employeeid)}
+                  onClick={() => onDelete(employee.employeeid)}
                 >
                   Delete
                 </button>
