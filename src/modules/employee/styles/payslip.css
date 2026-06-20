@@ -1,0 +1,27 @@
+@media print {
+
+  body {
+    margin: 0;
+    padding: 0;
+  }
+
+  .navbar,
+  .sidebar,
+  .btn {
+    display: none !important;
+  }
+
+  .card {
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  table {
+    page-break-inside: avoid;
+  }
+
+  .container-fluid {
+    width: 100%;
+    max-width: 100%;
+  }
+}

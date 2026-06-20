@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { getEmployeePayslips } from "../../payroll/services/payslipService";
 
 function EmployeePayslips() {
@@ -16,18 +15,14 @@ function EmployeePayslips() {
     try {
       const user = JSON.parse(localStorage.getItem("user"));
 
-      console.log("Logged User:", user);
-
       const employeeId = user?.id || user?.employeeId || user?.employeeid;
 
       if (!employeeId) {
-        alert("Employee ID not found.");
+        alert("Employee ID not found");
         return;
       }
 
       const response = await getEmployeePayslips(employeeId);
-
-      console.log("Employee Payslips:", response.data);
 
       setPayslips(response.data || []);
     } catch (error) {
@@ -99,12 +94,12 @@ function EmployeePayslips() {
                     View
                   </button>
 
-                  <button
+                  <a
+                    href={`http://localhost:8080/api/employee-management/downloadpayslip/${payslip.payslipId}`}
                     className="btn btn-success btn-sm"
-                    onClick={() => window.print()}
                   >
-                    Download
-                  </button>
+                    Download PDF
+                  </a>
                 </td>
               </tr>
             ))
