@@ -1,9 +1,6 @@
 package com.emp.manag.employee.controller;
 
-import java.io.ByteArrayInputStream;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +18,10 @@ public class PayslipPdfController {
     @GetMapping(
             value = "/downloadpayslip/{payslipId}",
             produces = MediaType.APPLICATION_PDF_VALUE)
-    public ResponseEntity<InputStreamResource>
-    downloadPayslip(
+    public ResponseEntity<byte[]> downloadPayslip(
             @PathVariable Integer payslipId) {
 
-        ByteArrayInputStream pdf =
+        byte[] pdf =
                 pdfService.generatePdf(
                         payslipId);
 
@@ -33,16 +29,14 @@ public class PayslipPdfController {
                 new HttpHeaders();
 
         headers.add(
-                "Content-Disposition",
-                "inline; filename=payslip.pdf");
+                HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=payslip.pdf");
 
         return ResponseEntity
                 .ok()
                 .headers(headers)
                 .contentType(
                         MediaType.APPLICATION_PDF)
-                .body(
-                        new InputStreamResource(
-                                pdf));
+                .body(pdf);
     }
 }

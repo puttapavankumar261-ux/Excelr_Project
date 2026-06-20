@@ -34,6 +34,25 @@ public class AttendanceController {
         return service.saveAttendance(attendance);
     }
 
+    @PostMapping("/attendance/checkin/{employeeId}")
+    public AttendanceEntity checkIn(
+            @PathVariable Integer employeeId) {
+
+        return service.checkIn(employeeId);
+    }
+    @PutMapping("/attendance/checkout/{employeeId}")
+    public AttendanceEntity checkOut(
+            @PathVariable Integer employeeId) {
+
+        return service.checkOut(employeeId);
+    }
+    @GetMapping("/attendance/today/{employeeId}")
+    public AttendanceEntity getTodayAttendance(
+            @PathVariable Integer employeeId) {
+
+        return service.getTodayAttendance(
+                employeeId);
+    }
     @PutMapping("/updateattendance/{attendanceId}")
     public String updateAttendance(
             @PathVariable Integer attendanceId,

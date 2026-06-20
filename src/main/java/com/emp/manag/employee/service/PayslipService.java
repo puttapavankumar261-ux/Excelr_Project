@@ -38,6 +38,10 @@ public class PayslipService {
 	private MonthlyAttendanceSummaryService monthlySummaryService;
 
 	public PayslipEntity generatePayslip(Integer employeeId, Integer year, Integer month) {
+		System.out.println("======== GENERATE PAYSLIP ========");
+		System.out.println("Employee ID = " + employeeId);
+		System.out.println("Year        = " + year);
+		System.out.println("Month       = " + month);
 
 		if (employeeId == null) {
 			throw new RuntimeException("Employee ID is required");
@@ -54,6 +58,7 @@ public class PayslipService {
 
 		LocalDate payrollMonth =
 		        LocalDate.of(year, month, 1);
+		System.out.println("Payroll Month Search = " + payrollMonth);
 
 		PayrollEntity payroll =
 		        payrollRepo
@@ -67,8 +72,15 @@ public class PayslipService {
 		                        + "-"
 		                        + month));
 
-		MonthlyAttendanceSummaryEntity summary = monthlySummaryService.generateMonthlySummary(employeeId, year, month);
+		System.out.println("Generating Monthly Summary...");
 
+		MonthlyAttendanceSummaryEntity summary =
+		        monthlySummaryService.generateMonthlySummary(
+		                employeeId,
+		                year,
+		                month);
+
+		System.out.println("Summary Generated = " + summary.getSummaryId());
 		PayslipEntity payslip = new PayslipEntity();
 		payslip.setEmployee(employee);
 		payslip.setPayroll(payroll);
@@ -212,7 +224,11 @@ public class PayslipService {
 
 		BigDecimal totalDeductions =
 		        lopDeduction
-		        .add(payroll.getDeductions());
+		        .add(payroll.getDeductions())
+		        .add(payroll.getPf())
+		        .add(payroll.getEsi())
+		        .add(payroll.getProfessionalTax())
+		        .add(payroll.getIncomeTax());
 
 		payslip.setWorkingDays(workingDays);
 		payslip.setPaidDays(paidDays);
@@ -230,13 +246,12 @@ public class PayslipService {
 		payslip.setOtherDeductions(payroll.getDeductions());
 		payslip.setTotalDeductions(totalDeductions);
 		BigDecimal payableGross =
-		        monthlyGross.subtract(
-		                lopDeduction);
+		        monthlyGross.subtract(lopDeduction);
 
 		payslip.setNetPay(
 		        payableGross
-		        .subtract(payroll.getDeductions())
-		        .max(BigDecimal.ZERO));	}
+		        .subtract(totalDeductions)
+		        .max(BigDecimal.ZERO));}
 
 	private YearMonth validateYearMonth(Integer year, Integer month) {
 

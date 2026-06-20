@@ -21,6 +21,9 @@ public class PayrollService {
 
 	@Autowired
 	private PayrollRepo payrollRepo;
+	
+	@Autowired
+	private PayslipService payslipService;
 
 	@Autowired
 	private EmpRepo empRepo;
@@ -120,7 +123,19 @@ public class PayrollService {
 		payroll.setApprovedBy(approver);
 		payroll.setStatus(PayrollStatus.HR_APPROVED);
 
-		return payrollRepo.save(payroll);
+		payroll = payrollRepo.save(payroll);
+
+		System.out.println("======== APPROVE PAYROLL ========");
+		System.out.println("Payroll ID : " + payroll.getPayrollId());
+		System.out.println("Employee ID: " + payroll.getEmployee().getEmployeeid());
+		System.out.println("Month      : " + payroll.getPayrollMonth());
+
+		payslipService.generatePayslip(
+		        payroll.getEmployee().getEmployeeid(),
+		        payroll.getPayrollMonth().getYear(),
+		        payroll.getPayrollMonth().getMonthValue());
+
+		return payroll;
 	}
 
 	public PayrollEntity getPayrollById(Integer payrollId) {
@@ -229,14 +244,21 @@ public class PayrollService {
 
 	private void recalculatePayroll(PayrollEntity payroll) {
 
-	    BigDecimal grossSalary = payroll.getBasicSalary()
+	    BigDecimal grossSalary =
+	            payroll.getBasicSalary()
 	            .add(payroll.getHra())
 	            .add(payroll.getAllowances())
 	            .add(payroll.getBonus());
 
+	    BigDecimal totalDeductions =
+	            payroll.getDeductions()
+	            .add(payroll.getPf())
+	            .add(payroll.getEsi())
+	            .add(payroll.getProfessionalTax())
+	            .add(payroll.getIncomeTax());
+
 	    BigDecimal netSalary =
-	            grossSalary.subtract(
-	                    payroll.getDeductions());
+	            grossSalary.subtract(totalDeductions);
 
 	    if (netSalary.compareTo(BigDecimal.ZERO) < 0) {
 	        netSalary = BigDecimal.ZERO;

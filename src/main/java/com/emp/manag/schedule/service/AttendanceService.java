@@ -199,6 +199,78 @@ public class AttendanceService {
 
 		return workingDays;
 	}
+	
+	public AttendanceEntity checkIn(Integer employeeId) {
+
+	    EmpEntity employee =
+	            empRepo.findById(employeeId)
+	            .orElseThrow(() ->
+	                    new RuntimeException("Employee not found"));
+
+	    LocalDate today = LocalDate.now();
+
+	    if (attendanceRepo1
+	            .findByEmployeeEmployeeidAndAttendanceDate(
+	                    employeeId,
+	                    today)
+	            .isPresent()) {
+
+	        throw new RuntimeException(
+	                "Already checked in today");
+	    }
+
+	    AttendanceEntity attendance =
+	            new AttendanceEntity();
+
+	    attendance.setEmployee(employee);
+
+	    attendance.setShift(employee.getShift());
+
+	    attendance.setAttendanceDate(today);
+
+	    attendance.setPunchInTime(
+	            LocalTime.now());
+
+	    recalculateAttendance(attendance);
+
+	    return attendanceRepo1.save(attendance);
+	}
+	
+	public AttendanceEntity checkOut(
+	        Integer employeeId) {
+
+	    AttendanceEntity attendance =
+	            attendanceRepo1
+	            .findByEmployeeEmployeeidAndAttendanceDate(
+	                    employeeId,
+	                    LocalDate.now())
+	            .orElseThrow(() ->
+	                    new RuntimeException(
+	                            "Check-in not found"));
+
+	    if (attendance.getPunchOutTime() != null) {
+
+	        throw new RuntimeException(
+	                "Already checked out");
+	    }
+
+	    attendance.setPunchOutTime(
+	            LocalTime.now());
+
+	    recalculateAttendance(attendance);
+
+	    return attendanceRepo1.save(attendance);
+	}
+	
+	public AttendanceEntity getTodayAttendance(
+	        Integer employeeId) {
+
+	    return attendanceRepo1
+	            .findByEmployeeEmployeeidAndAttendanceDate(
+	                    employeeId,
+	                    LocalDate.now())
+	            .orElse(null);
+	}
 
 	private void validateAttendanceRequest(AttendanceEntity attendance, boolean requireEmployee) {
 
@@ -311,12 +383,12 @@ public class AttendanceService {
 					.longValue();
 		}
 
-		if (totalWorkMinutes < 4 * 60) {
-			return AttendanceStatus.ABSENT;
+		if (totalWorkMinutes == 0) {
+		    return AttendanceStatus.PRESENT;
 		}
 
 		if (totalWorkMinutes < minWorkMinutes) {
-			return AttendanceStatus.HALF_DAY;
+		    return AttendanceStatus.HALF_DAY;
 		}
 
 		return AttendanceStatus.PRESENT;

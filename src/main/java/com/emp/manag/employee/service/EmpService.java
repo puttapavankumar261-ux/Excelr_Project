@@ -30,8 +30,27 @@ public class EmpService {
 
 	@Autowired
 	private EmpLoginRepo loginRepo;
-	
-	
+
+	public EmpEntity assignShift(
+	        Integer employeeId,
+	        Integer shiftId) {
+
+	    EmpEntity employee =
+	            empRepo.findById(employeeId)
+	            .orElseThrow(() ->
+	                    new RuntimeException(
+	                            "Employee not found"));
+
+	    ShiftEntity shift =
+	            shiftRepo.findById(shiftId)
+	            .orElseThrow(() ->
+	                    new RuntimeException(
+	                            "Shift not found"));
+
+	    employee.setShift(shift);
+
+	    return empRepo.save(employee);
+	}
 	
 	public EmpEntity saveEmployee(EmpEntity employee) {
 

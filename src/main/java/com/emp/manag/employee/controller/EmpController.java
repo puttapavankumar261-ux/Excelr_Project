@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.emp.manag.config.dto.EmployeeOnboardingRequest;
 import com.emp.manag.employee.entity.EmpEntity;
 import com.emp.manag.employee.service.EmpService;
+import com.emp.manag.schedule.entity.ShiftEntity;
 
 @RestController
 @RequestMapping("/api/employee-management")
@@ -53,6 +54,28 @@ public class EmpController {
 	public EmpEntity getEmployeeById(@PathVariable Integer employeeId) {
 	    return service.getEmployeeById(employeeId);
 	}
+	
+	@GetMapping(
+		    "/employeeshift/{employeeId}")
+		public ShiftEntity getEmployeeShift(
+		        @PathVariable Integer employeeId) {
+
+		    EmpEntity employee =
+		            service.getEmployeeById(employeeId);
+
+		    return employee.getShift();
+		}
+	
+	@PutMapping(
+		    "/assignshift/{employeeId}/{shiftId}")
+		public EmpEntity assignShift(
+		        @PathVariable Integer employeeId,
+		        @PathVariable Integer shiftId) {
+
+		return service.assignShift(
+		        employeeId,
+		        shiftId);
+		}
 
 	@DeleteMapping("/DeleteEmp/{employeeId}")
 	public String deleteEmployee(

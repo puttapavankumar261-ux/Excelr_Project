@@ -56,8 +56,22 @@ public class PayrollController {
 	}
 
 	@PutMapping("/approvepayroll/{payrollId}/{approvedById}")
-	public PayrollEntity approvePayroll(@PathVariable Integer payrollId, @PathVariable Integer approvedById) {
-		return payrollService.approvePayroll(payrollId, approvedById);
+	public PayrollEntity approvePayroll(
+	        @PathVariable Integer payrollId,
+	        @PathVariable Integer approvedById) {
+
+	    try {
+
+	        return payrollService.approvePayroll(
+	                payrollId,
+	                approvedById);
+
+	    } catch (Exception e) {
+
+	        e.printStackTrace();
+
+	        throw e;
+	    }
 	}
 
 	@GetMapping("/getpayroll/{payrollId}")
