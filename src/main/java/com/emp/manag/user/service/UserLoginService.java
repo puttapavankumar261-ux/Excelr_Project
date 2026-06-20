@@ -2,11 +2,6 @@ package com.emp.manag.user.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.time.LocalDate;
-
-import com.emp.manag.employee.repo.EmpRepo;
-import com.emp.manag.schedule.repo.LeaveRepo;
-import com.emp.manag.schedule.entity.LeaveEntity;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,12 +27,6 @@ public class UserLoginService {
 
 	@Autowired
 	private UserRepo userRepo;
-	
-	@Autowired
-	private EmpRepo empRepo;
-
-	@Autowired
-	private LeaveRepo leaveRepo;
 
 	public UserLoginEntity saveLogin(UserLoginEntity login) {
 
@@ -170,29 +159,6 @@ public class UserLoginService {
 	                    .orElseThrow(() ->
 	                            new RuntimeException(
 	                                    "Invalid username or password"));
-
-	    LocalDate today = LocalDate.now();
-
-	    Integer userId =
-	            login.getUser().getUserId();
-
-	    var employee =
-	            empRepo.findByUserUserId(userId);
-
-	    if (employee.isPresent()) {
-
-	        List<LeaveEntity> approvedLeaves =
-	                leaveRepo.findActiveApprovedLeave(
-	                        employee.get()
-	                                .getEmployeeid(),
-	                        today);
-
-	        if (!approvedLeaves.isEmpty()) {
-
-	            throw new RuntimeException(
-	                    "Employee is currently on approved leave.");
-	        }
-	    }
 
 	    if (!"ACTIVE".equalsIgnoreCase(
 	            login.getStatus())) {

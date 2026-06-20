@@ -26,8 +26,9 @@ public class PayslipPdfController {
             @PathVariable Integer payslipId) {
 
         ByteArrayInputStream pdf =
-                pdfService.generatePdf(
-                        payslipId);
+                new ByteArrayInputStream(
+                        pdfService.generatePdf(
+                                payslipId));
 
         HttpHeaders headers =
                 new HttpHeaders();

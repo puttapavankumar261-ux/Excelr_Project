@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getEmployees } from "../../employee/services/employeeService";
 import { getAllTaxSlabs } from "../../tax/services/taxService";
 
-import { saveSalaryStructure } from "../serices/salaryStructureService";
+import { saveSalaryStructure } from "../services/salaryStructureService";
 
 function AddSalaryStructureModal({ onClose, onSuccess }) {
   const [employees, setEmployees] = useState([]);
@@ -22,20 +22,20 @@ function AddSalaryStructureModal({ onClose, onSuccess }) {
   });
 
   useEffect(() => {
+    const loadData = async () => {
+      try {
+        const empRes = await getEmployees();
+        setEmployees(empRes.data || []);
+
+        const taxRes = await getAllTaxSlabs();
+        setTaxSlabs(taxRes.data || []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
     loadData();
   }, []);
-
-  const loadData = async () => {
-    try {
-      const empRes = await getEmployees();
-      setEmployees(empRes.data || []);
-
-      const taxRes = await getAllTaxSlabs();
-      setTaxSlabs(taxRes.data || []);
-    } catch (error) {
-      console.error(error);
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({
@@ -92,7 +92,7 @@ function AddSalaryStructureModal({ onClose, onSuccess }) {
           <h3>Add Salary Structure</h3>
 
           <button className="btn-close" onClick={onClose}>
-            ✕
+            &times;
           </button>
         </div>
 
