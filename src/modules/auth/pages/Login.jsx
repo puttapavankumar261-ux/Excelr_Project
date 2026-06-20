@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  FiActivity,
   FiArrowRight,
   FiBriefcase,
   FiCheckCircle,
@@ -11,7 +12,12 @@ import {
 } from "react-icons/fi";
 import AdminSetup from "./AdminSetup";
 
-import { employeeLogin } from "../services/authService";
+import {
+  getLoginRole,
+  loginWithFallback,
+  normalizeLoggedInUser,
+} from "../services/authService";
+import { getApiErrorMessage } from "../../../api/errorUtils";
 
 import "../styles/Login.css";
 
@@ -36,6 +42,12 @@ function Login() {
     "Leave management",
   ];
 
+  const platformStats = [
+    { label: "Core Modules", value: "6" },
+    { label: "Portal Access", value: "3" },
+    { label: "Status", value: "Secure" },
+  ];
+
   const handleChange = (e) => {
     setLoginData({
       ...loginData,
@@ -54,13 +66,19 @@ function Login() {
 
       setLoading(true);
 
-      const response = await employeeLogin(loginData);
+      const response = await loginWithFallback({
+        username: loginData.username.trim(),
+        password: loginData.password,
+      });
 
       console.log("Login Response:", response.data);
 
-      localStorage.setItem("user", JSON.stringify(response.data));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(normalizeLoggedInUser(response.data)),
+      );
 
-      const role = response.data.role?.toUpperCase();
+      const role = getLoginRole(response.data);
 
       switch (role) {
         case "ADMIN":
@@ -81,15 +99,7 @@ function Login() {
     } catch (err) {
       console.error("Login Error:", err);
 
-      if (err.code === "ECONNREFUSED" || err.message?.includes("ECONNREFUSED")) {
-        setError(
-          "Backend server is not running on http://127.0.0.1:8080. Start the backend first.",
-        );
-      } else if (err.response) {
-        setError(err.response.data.message || "Invalid username or password");
-      } else {
-        setError(err.message || "Unable to connect to server");
-      }
+      setError(getApiErrorMessage(err, "Invalid username or password"));
     } finally {
       setLoading(false);
     }
@@ -119,6 +129,15 @@ function Login() {
                   workforce analytics from one focused platform.
                 </p>
 
+                <div className="login-stat-strip">
+                  {platformStats.map((item) => (
+                    <div key={item.label}>
+                      <strong>{item.value}</strong>
+                      <span>{item.label}</span>
+                    </div>
+                  ))}
+                </div>
+
                 <div className="feature-list">
                   {features.map((feature) => (
                     <div key={feature}>
@@ -145,6 +164,10 @@ function Login() {
                   <p className="text-muted">
                     Sign in to continue to your portal.
                   </p>
+                </div>
+
+                <div className="login-status-pill">
+                  <FiActivity /> Workspace authentication
                 </div>
 
                 <label className="input-label" htmlFor="username">

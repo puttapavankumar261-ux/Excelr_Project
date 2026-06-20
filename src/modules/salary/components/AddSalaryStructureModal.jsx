@@ -1,9 +1,10 @@
+
 import { useEffect, useState } from "react";
 
 import { getEmployees } from "../../employee/services/employeeService";
 import { getAllTaxSlabs } from "../../tax/services/taxService";
 
-import { saveSalaryStructure } from "../services/salaryStructureService";
+import { saveSalaryStructure } from "../serices/salaryStructureService";
 
 function AddSalaryStructureModal({ onClose, onSuccess }) {
   const [employees, setEmployees] = useState([]);

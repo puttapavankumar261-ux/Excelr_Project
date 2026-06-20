@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { saveEmployee, saveLogin } from "../services/setupService";
-import { employeeLogin } from "../services/authService";
+import { setupAdmin } from "../services/setupService";
+import { loginWithFallback, normalizeLoggedInUser } from "../services/authService";
+import { getApiErrorMessage } from "../../../api/errorUtils";
 
 function AdminSetup({ onClose }) {
   const navigate = useNavigate();
@@ -46,44 +47,29 @@ function AdminSetup({ onClose }) {
 
       setLoading(true);
 
-      // STEP 1 - Create Employee
+      const employeeName = formData.employeeName.trim();
+      const username = formData.username.trim();
+      const password = formData.password;
 
-      const employeeResponse = await saveEmployee({
-        employeename: formData.employeeName,
+      // Create the admin employee and login in one backend transaction.
+      await setupAdmin({
+        employeeName,
+        username,
+        password,
         role: "ADMIN",
         designation: "MANAGER",
         department: "ADMIN",
-        employmentType: "FULL_TIME",
-        employmentStatus: "ACTIVE",
-        workLocation: "Head Office",
       });
 
-      const employeeId = employeeResponse.data.employeeid;
-
-      if (!employeeId) {
-        throw new Error("Employee ID not returned from backend");
-      }
-
-      // STEP 2 - Create Login
-
-      await saveLogin({
-        employee: {
-          employeeid: employeeId,
-        },
-        username: formData.username,
-        passwordHash: formData.password,
-        role: "ADMIN",
-        status: "ACTIVE",
+      const loginResponse = await loginWithFallback({
+        username,
+        password,
       });
 
-      // STEP 3 - Auto Login
-
-      const loginResponse = await employeeLogin({
-        username: formData.username,
-        password: formData.password,
-      });
-
-      localStorage.setItem("user", JSON.stringify(loginResponse.data));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(normalizeLoggedInUser(loginResponse.data)),
+      );
 
       setSuccess("Admin account created successfully");
 
@@ -97,22 +83,7 @@ function AdminSetup({ onClose }) {
     } catch (err) {
       console.error(err);
 
-      if (
-        err.code === "ECONNREFUSED" ||
-        err.message?.includes("ECONNREFUSED")
-      ) {
-        setError(
-          "Backend server is not running on http://127.0.0.1:8080. Start the backend first.",
-        );
-      } else if (err.response) {
-        setError(
-          err.response.data.message ||
-            err.response.data.error ||
-            "Admin setup failed",
-        );
-      } else {
-        setError(err.message || "Admin setup failed");
-      }
+      setError(getApiErrorMessage(err, "Admin setup failed"));
     } finally {
       setLoading(false);
     }

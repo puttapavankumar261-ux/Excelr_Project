@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  FiArrowUpRight,
   FiCalendar,
   FiClock,
   FiCreditCard,
@@ -73,24 +74,28 @@ function EmployeeDashboard() {
       value: employee?.employeeid || user?.id || "-",
       helper: "Your HRMS profile number",
       icon: FiUser,
+      tone: "tone-blue",
     },
     {
       label: "Department",
       value: employee?.department || "-",
       helper: "Team assignment",
       icon: FiUsers,
+      tone: "tone-green",
     },
     {
       label: "Designation",
       value: employee?.designation || "-",
       helper: "Current position",
       icon: FiCreditCard,
+      tone: "tone-gold",
     },
     {
       label: "Status",
       value: employee?.employmentStatus || employee?.role || "-",
       helper: "Employment record",
       icon: FiClock,
+      tone: "tone-red",
     },
   ];
 
@@ -98,31 +103,31 @@ function EmployeeDashboard() {
     {
       label: "My Profile",
       icon: FiUser,
-      className: "btn btn-primary",
+      tone: "action-blue",
       path: "/employee/profile",
     },
     {
       label: "Attendance",
       icon: FiClock,
-      className: "btn btn-success",
+      tone: "action-green",
       path: "/employee/attendance",
     },
     {
       label: "Leave Requests",
       icon: FiCalendar,
-      className: "btn btn-warning",
+      tone: "action-gold",
       path: "/employee/leave",
     },
     {
       label: "Payslips",
       icon: FiCreditCard,
-      className: "btn btn-info",
+      tone: "action-blue",
       path: "/employee/payslips",
     },
     {
       label: "Change Password",
       icon: FiLock,
-      className: "btn btn-outline-secondary",
+      tone: "action-dark",
       path: "/employee/change-password",
     },
   ];
@@ -137,6 +142,10 @@ function EmployeeDashboard() {
             Keep track of your profile, attendance, leaves, payslips and account
             settings from a single personal workspace.
           </p>
+          <div className="hero-chip-row">
+            <span>{employee?.employmentStatus || "Active record"}</span>
+            <span>{attendancePercentage}% attendance</span>
+          </div>
         </div>
 
         <div className="hero-profile-panel">
@@ -153,7 +162,7 @@ function EmployeeDashboard() {
           const Icon = stat.icon;
 
           return (
-            <div className="stat-card" key={stat.label}>
+            <div className={`stat-card ${stat.tone}`} key={stat.label}>
               <span className="stat-icon">
                 <Icon />
               </span>
@@ -257,18 +266,22 @@ function EmployeeDashboard() {
           </button>
         </div>
 
-        <div className="employee-action-panel">
+        <div className="quick-action-grid">
           {actions.map((action) => {
             const Icon = action.icon;
 
             return (
               <button
                 type="button"
-                className={action.className}
+                className={`quick-action-card ${action.tone}`}
                 key={action.label}
                 onClick={() => navigate(action.path)}
               >
-                <Icon /> {action.label}
+                <span>
+                  <Icon />
+                </span>
+                <strong>{action.label}</strong>
+                <FiArrowUpRight />
               </button>
             );
           })}

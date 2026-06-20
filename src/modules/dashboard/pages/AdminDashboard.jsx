@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FiActivity,
+  FiAlertCircle,
+  FiArrowUpRight,
   FiBarChart2,
   FiBriefcase,
   FiCalendar,
@@ -49,25 +51,33 @@ function AdminDashboard() {
 
   const [employees, setEmployees] = useState([]);
   const [attendance, setAttendance] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [dashboardError, setDashboardError] = useState("");
   const [profile] = useState(getInitialAdminProfile);
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      try {
-        const [employeeResponse, attendanceResponse] = await Promise.all([
-          getEmployees(),
-          getAllAttendance(),
-        ]);
+  const loadDashboardData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setDashboardError("");
 
-        setEmployees(employeeResponse.data || []);
-        setAttendance(attendanceResponse.data || []);
-      } catch (error) {
-        console.error("Error loading dashboard data:", error);
-      }
-    };
+      const [employeeResponse, attendanceResponse] = await Promise.all([
+        getEmployees(),
+        getAllAttendance(),
+      ]);
 
-    loadDashboardData();
+      setEmployees(employeeResponse.data || []);
+      setAttendance(attendanceResponse.data || []);
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+      setDashboardError("Dashboard data could not be refreshed. Showing the last available view.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    loadDashboardData();
+  }, [loadDashboardData]);
 
   const departmentSummary = useMemo(() => {
     return Object.entries(
@@ -87,8 +97,16 @@ function AdminDashboard() {
     ? Math.round((presentToday / attendance.length) * 100)
     : 0;
 
+  const absentToday = Math.max(employees.length - presentToday, 0);
   const activeDepartments = departmentSummary.length;
   const recentEmployees = employees.slice(0, 5);
+  const topDepartments = departmentSummary.slice(0, 4);
+  const adminInitial = (profile.name || "A").charAt(0).toUpperCase();
+  const todayLabel = new Intl.DateTimeFormat("en-IN", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+  }).format(new Date());
 
   const stats = [
     {
@@ -96,6 +114,7 @@ function AdminDashboard() {
       value: employees.length,
       helper: "Active workforce records",
       icon: FiUsers,
+      tone: "tone-blue",
       path: "/admin/employees",
     },
     {
@@ -103,6 +122,7 @@ function AdminDashboard() {
       value: presentToday,
       helper: "Marked present in attendance",
       icon: FiCheckCircle,
+      tone: "tone-green",
       path: "/admin/attendance",
     },
     {
@@ -110,6 +130,7 @@ function AdminDashboard() {
       value: activeDepartments,
       helper: "Teams currently tracked",
       icon: FiBriefcase,
+      tone: "tone-gold",
       path: "/admin/employees",
     },
     {
@@ -117,6 +138,7 @@ function AdminDashboard() {
       value: `${attendanceRate}%`,
       helper: "Based on loaded records",
       icon: FiActivity,
+      tone: "tone-red",
       path: "/admin/attendance-summary",
     },
   ];
@@ -125,26 +147,44 @@ function AdminDashboard() {
     {
       label: "Add Employee",
       icon: FiUserPlus,
-      className: "btn btn-primary",
+      tone: "action-blue",
       path: "/admin/employees/add",
     },
     {
       label: "Generate Payroll",
       icon: FiDollarSign,
-      className: "btn btn-success",
+      tone: "action-green",
       path: "/admin/payroll",
     },
     {
       label: "Approve Leaves",
       icon: FiCalendar,
-      className: "btn btn-warning",
+      tone: "action-gold",
       path: "/admin/leave-approval",
     },
     {
       label: "View Reports",
       icon: FiBarChart2,
-      className: "btn btn-dark",
+      tone: "action-dark",
       path: "/admin/reports",
+    },
+  ];
+
+  const systemPulse = [
+    {
+      label: "Attendance",
+      value: `${attendanceRate}%`,
+      detail: `${presentToday} present, ${absentToday} pending`,
+    },
+    {
+      label: "Workforce",
+      value: employees.length,
+      detail: `${activeDepartments} active departments`,
+    },
+    {
+      label: "Data Status",
+      value: loading ? "Syncing" : "Ready",
+      detail: dashboardError || "Dashboard data is up to date",
     },
   ];
 
@@ -168,15 +208,36 @@ function AdminDashboard() {
             Review workforce health, track attendance, and jump into the core HR
             workflows from one organized dashboard.
           </p>
+          <div className="hero-chip-row">
+            <span>{todayLabel}</span>
+            <span>{loading ? "Refreshing data" : "Live workspace"}</span>
+          </div>
         </div>
 
         <div className="hero-profile-panel">
-          <span className="profile-avatar">{profile.name.charAt(0).toUpperCase()}</span>
+          <span className="profile-avatar">{adminInitial}</span>
           <div>
             <strong>{profile.role}</strong>
             <span>{profile.email}</span>
           </div>
         </div>
+      </section>
+
+      {(dashboardError || loading) && (
+        <div className={`dashboard-notice ${dashboardError ? "is-warning" : ""}`}>
+          <FiAlertCircle />
+          <span>{dashboardError || "Refreshing dashboard data..."}</span>
+        </div>
+      )}
+
+      <section className="pulse-grid">
+        {systemPulse.map((item) => (
+          <div className="pulse-card" key={item.label}>
+            <span>{item.label}</span>
+            <strong>{item.value}</strong>
+            <small>{item.detail}</small>
+          </div>
+        ))}
       </section>
 
       <section className="stats-grid">
@@ -186,7 +247,7 @@ function AdminDashboard() {
           return (
             <button
               type="button"
-              className="stat-card"
+              className={`stat-card ${stat.tone}`}
               key={stat.label}
               onClick={() => navigate(stat.path)}
             >
@@ -198,6 +259,7 @@ function AdminDashboard() {
                 <strong>{stat.value}</strong>
                 <small>{stat.helper}</small>
               </span>
+              <FiArrowUpRight className="stat-arrow" />
             </button>
           );
         })}
@@ -259,10 +321,14 @@ function AdminDashboard() {
                 <button
                   type="button"
                   key={action.label}
-                  className={action.className}
+                  className={`quick-action-card ${action.tone}`}
                   onClick={() => navigate(action.path)}
                 >
-                  <Icon /> {action.label}
+                  <span>
+                    <Icon />
+                  </span>
+                  <strong>{action.label}</strong>
+                  <FiArrowUpRight />
                 </button>
               );
             })}
@@ -278,6 +344,30 @@ function AdminDashboard() {
               <h3>Department Summary</h3>
             </div>
             <FiBriefcase />
+          </div>
+
+          <div className="department-bars">
+            {topDepartments.length > 0 ? (
+              topDepartments.map(([department, count]) => {
+                const width = employees.length
+                  ? Math.max(8, Math.round((count / employees.length) * 100))
+                  : 0;
+
+                return (
+                  <div className="department-bar" key={department}>
+                    <div>
+                      <strong>{department}</strong>
+                      <span>{count} employees</span>
+                    </div>
+                    <div className="department-track">
+                      <span style={{ width: `${width}%` }} />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="empty-state">No department data available</div>
+            )}
           </div>
 
           <div className="table-responsive">
@@ -373,9 +463,18 @@ function AdminDashboard() {
                     onClick={() => navigate("/admin/employees")}
                   >
                     <td>{employee.employeeid}</td>
-                    <td>{getEmployeeName(employee)}</td>
+                    <td>
+                      <span className="employee-cell">
+                        <span className="employee-avatar">
+                          {getEmployeeName(employee).charAt(0).toUpperCase()}
+                        </span>
+                        {getEmployeeName(employee)}
+                      </span>
+                    </td>
                     <td>{employee.department || "-"}</td>
-                    <td>{employee.designation || "-"}</td>
+                    <td>
+                      <span className="role-pill">{employee.designation || "-"}</span>
+                    </td>
                   </tr>
                 ))
               ) : (
