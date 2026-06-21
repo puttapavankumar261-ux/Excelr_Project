@@ -1,22 +1,46 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  FiBriefcase,
+  FiKey,
+  FiMail,
+  FiMapPin,
+  FiRefreshCw,
+  FiUser,
+} from "react-icons/fi";
 
+import {
+  EnterprisePage,
+  ErrorBanner,
+  LoadingState,
+  MetricCard,
+  PageHero,
+  StatusBadge,
+} from "../../../components/ui/EnterpriseUI";
+import { formatDate } from "../../../components/ui/formatters";
+import { getApiErrorMessage } from "../../../api/errorUtils";
 import { getEmployeeById } from "../services/employeeService";
+
+function DetailItem({ label, value }) {
+  return (
+    <p>
+      <strong>{label}</strong>
+      <span>{value || "N/A"}</span>
+    </p>
+  );
+}
 
 function EmployeeProfile() {
   const navigate = useNavigate();
-
   const [employee, setEmployee] = useState(null);
-
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    loadProfile();
-  }, []);
+  const [error, setError] = useState("");
 
   const loadProfile = async () => {
     try {
-      const user = JSON.parse(localStorage.getItem("user"));
+      setLoading(true);
+      setError("");
+      const user = JSON.parse(localStorage.getItem("user") || "null");
 
       if (!user?.id) {
         navigate("/login");
@@ -24,141 +48,158 @@ function EmployeeProfile() {
       }
 
       const response = await getEmployeeById(user.id);
-
       setEmployee(response.data);
-    } catch (error) {
-      console.error("Error loading profile:", error);
+    } catch (loadError) {
+      console.error("Error loading profile:", loadError);
+      setError(getApiErrorMessage(loadError, "Unable to load employee profile."));
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    loadProfile();
+  }, []);
+
   if (loading) {
     return (
-      <div className="container-fluid p-4">
-        <h4>Loading Profile...</h4>
-      </div>
+      <EnterprisePage>
+        <section className="enterprise-panel">
+          <LoadingState label="Loading profile..." />
+        </section>
+      </EnterprisePage>
     );
   }
 
   if (!employee) {
     return (
-      <div className="container-fluid p-4">
-        <h4>Employee Profile Not Found</h4>
-      </div>
+      <EnterprisePage>
+        <ErrorBanner message={error || "Employee profile not found."} onRetry={loadProfile} />
+      </EnterprisePage>
     );
   }
 
+  const employeeName = employee.employeename || employee.employeeName || "Employee";
+
   return (
-    <div className="container-fluid p-4">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>My Profile</h2>
-
-        <button
-          className="btn btn-secondary"
-          onClick={() => navigate("/employee")}
-        >
-          Back
-        </button>
-      </div>
-
-      <div className="card shadow-sm">
-        <div className="card-body">
-          <h5>Employee Information</h5>
-
-          <hr />
-
-          <p>
-            <strong>Employee ID :</strong> {employee.employeeid || "N/A"}
-          </p>
-
-          <p>
-            <strong>Employee Code :</strong> {employee.employeeCode || "N/A"}
-          </p>
-
-          <p>
-            <strong>Name :</strong> {employee.employeename || "N/A"}
-          </p>
-
-          <p>
-            <strong>Department :</strong> {employee.department || "N/A"}
-          </p>
-
-          <p>
-            <strong>Designation :</strong> {employee.designation || "N/A"}
-          </p>
-
-          <p>
-            <strong>Role :</strong> {employee.role || "N/A"}
-          </p>
-
-          <p>
-            <strong>Employment Type :</strong>{" "}
-            {employee.employmentType || "N/A"}
-          </p>
-
-          <p>
-            <strong>Employment Status :</strong>{" "}
-            {employee.employmentStatus || "N/A"}
-          </p>
-
-          <p>
-            <strong>Phone Number :</strong> {employee.phonenumber || "N/A"}
-          </p>
-
-          <p>
-            <strong>Company Email :</strong> {employee.companyemail || "N/A"}
-          </p>
-
-          <p>
-            <strong>Work Location :</strong> {employee.workLocation || "N/A"}
-          </p>
-
-          <p>
-            <strong>Joining Date :</strong> {employee.joiningDate || "N/A"}
-          </p>
-
-          <p>
-            <strong>Resignation Date :</strong>{" "}
-            {employee.resignationDate || "N/A"}
-          </p>
-
-          <p>
-            <strong>Manager :</strong>{" "}
-            {employee.manager?.employeename || "Not Assigned"}
-          </p>
-
-          <p>
-            <strong>Shift :</strong>{" "}
-            {employee.shift?.shiftName || "Not Assigned"}
-          </p>
-
-          <p>
-            <strong>Created At :</strong> {employee.createdAt || "N/A"}
-          </p>
-
-          <p>
-            <strong>Updated At :</strong> {employee.updatedAt || "N/A"}
-          </p>
-
-          <div className="mt-4">
+    <EnterprisePage>
+      <PageHero
+        eyebrow="Employee Profile"
+        title={employeeName}
+        description="Review your employee record, reporting details, contact information, and account actions."
+        icon={FiUser}
+        meta={
+          <>
+            <span>Employee #{employee.employeeid || "N/A"}</span>
+            <span>{employee.department || "Department not assigned"}</span>
+            <span>
+              <StatusBadge status={employee.employmentStatus || "ACTIVE"} />
+            </span>
+          </>
+        }
+        actions={
+          <>
             <button
-              className="btn btn-primary me-2"
+              type="button"
+              className="btn btn-light"
+              onClick={loadProfile}
+              disabled={loading}
+            >
+              <FiRefreshCw /> Refresh
+            </button>
+            <button
+              type="button"
+              className="btn btn-warning"
               onClick={() => navigate("/employee/change-password")}
             >
-              Change Password
+              <FiKey /> Change Password
             </button>
+          </>
+        }
+      />
 
-            <button
-              className="btn btn-outline-secondary"
-              onClick={() => navigate("/employee")}
-            >
-              Dashboard
-            </button>
+      <ErrorBanner message={error} onRetry={loadProfile} />
+
+      <section className="enterprise-grid">
+        <MetricCard
+          label="Department"
+          value={employee.department || "N/A"}
+          helper={employee.designation || "Designation not set"}
+          icon={FiBriefcase}
+          tone="blue"
+        />
+        <MetricCard
+          label="Role"
+          value={employee.role || "N/A"}
+          helper={employee.employmentType || "Employment type not set"}
+          icon={FiUser}
+          tone="green"
+        />
+        <MetricCard
+          label="Location"
+          value={employee.workLocation || "N/A"}
+          helper="Current work location"
+          icon={FiMapPin}
+          tone="gold"
+        />
+        <MetricCard
+          label="Email"
+          value={employee.companyemail || "N/A"}
+          helper={employee.phonenumber || "Phone not set"}
+          icon={FiMail}
+          tone="teal"
+        />
+      </section>
+
+      <section className="enterprise-panel">
+        <div className="enterprise-panel-header">
+          <div>
+            <h2>Profile Information</h2>
+            <p>Core employee and assignment details from the HRMS record.</p>
           </div>
         </div>
-      </div>
-    </div>
+
+        <div className="detail-list">
+          <DetailItem label="Employee Code" value={employee.employeeCode} />
+          <DetailItem label="Name" value={employeeName} />
+          <DetailItem label="Department" value={employee.department} />
+          <DetailItem label="Designation" value={employee.designation} />
+          <DetailItem label="Role" value={employee.role} />
+          <DetailItem label="Employment Type" value={employee.employmentType} />
+          <DetailItem label="Employment Status" value={employee.employmentStatus} />
+          <DetailItem label="Phone Number" value={employee.phonenumber} />
+          <DetailItem label="Company Email" value={employee.companyemail} />
+          <DetailItem label="Work Location" value={employee.workLocation} />
+          <DetailItem label="Joining Date" value={formatDate(employee.joiningDate)} />
+          <DetailItem
+            label="Manager"
+            value={employee.manager?.employeename || "Not Assigned"}
+          />
+          <DetailItem
+            label="Shift"
+            value={employee.shift?.shiftName || "Not Assigned"}
+          />
+          <DetailItem label="Updated At" value={formatDate(employee.updatedAt)} />
+        </div>
+
+        <div className="enterprise-actions mt-4">
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => navigate("/employee/change-password")}
+          >
+            <FiKey /> Change Password
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={() => navigate("/employee")}
+          >
+            Dashboard
+          </button>
+        </div>
+      </section>
+    </EnterprisePage>
   );
 }
 

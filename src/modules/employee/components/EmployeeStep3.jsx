@@ -3,6 +3,8 @@ function EmployeeStep3({
   setFormData,
   handleSubmit,
   prevStep,
+  errors = {},
+  submitting = false,
 }) {
   const handleChange = (e) => {
     setFormData({
@@ -40,17 +42,21 @@ function EmployeeStep3({
       />
 
       <input
-        className="form-control mb-2"
+        className={`form-control mb-1 ${errors.ifscCode ? "is-invalid" : ""}`}
         placeholder="IFSC Code"
         name="ifscCode"
         value={formData.ifscCode || ""}
         onChange={handleChange}
       />
+      {errors.ifscCode && (
+        <div className="invalid-feedback d-block mb-2">{errors.ifscCode}</div>
+      )}
 
       <div className="d-flex justify-content-between">
         <button
           className="btn btn-secondary"
           onClick={prevStep}
+          disabled={submitting}
         >
           Back
         </button>
@@ -58,8 +64,9 @@ function EmployeeStep3({
         <button
           className="btn btn-success"
           onClick={handleSubmit}
+          disabled={submitting}
         >
-          Complete Onboarding
+          {submitting ? "Creating Employee..." : "Complete Onboarding"}
         </button>
       </div>
     </div>

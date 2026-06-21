@@ -1,201 +1,273 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  FiCalendar,
+  FiCheckCircle,
+  FiClock,
+  FiRefreshCw,
+  FiTrendingUp,
+  FiUsers,
+  FiXCircle,
+} from "react-icons/fi";
+
+import {
+  EmptyState,
+  EnterprisePage,
+  ErrorBanner,
+  LoadingState,
+  MetricCard,
+  MiniBarChart,
+  PageHero,
+  SearchField,
+  StatusBadge,
+} from "../../../components/ui/EnterpriseUI";
+import { formatDate } from "../../../components/ui/formatters";
 import { getAllAttendance } from "../services/attendanceService";
+
+const getStatus = (record) => record.attendanceStatus || record.status || "UNKNOWN";
+const getDate = (record) => record.attendanceDate || record.date || "";
+const getName = (record) => record.employeeName || record.employeename || "Employee";
 
 function AttendanceList() {
   const [attendance, setAttendance] = useState([]);
-
   const [search, setSearch] = useState("");
-
   const [statusFilter, setStatusFilter] = useState("ALL");
-
   const [dateFilter, setDateFilter] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const loadAttendance = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      const response = await getAllAttendance();
+      setAttendance(response.data || []);
+    } catch (loadError) {
+      console.error("Error loading attendance", loadError);
+      setError("Unable to load attendance records. Please retry or check the backend.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadAttendance();
   }, []);
 
-  const loadAttendance = async () => {
-    try {
-      const response = await getAllAttendance();
+  const statusCounts = useMemo(() => {
+    return attendance.reduce((acc, record) => {
+      const status = getStatus(record);
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+  }, [attendance]);
 
-      setAttendance(response.data || []);
-    } catch (error) {
-      console.error("Error loading attendance", error);
-    }
-  };
+  const filteredAttendance = useMemo(() => {
+    const query = search.trim().toLowerCase();
 
-  const filteredAttendance = attendance.filter((record) => {
-    const employeeMatch =
-      !search ||
-      record.employeeName?.toLowerCase().includes(search.toLowerCase());
+    return attendance.filter((record) => {
+      const searchable = [
+        getName(record),
+        record.employeeId,
+        record.department,
+        getStatus(record),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
 
-    const statusMatch =
-      statusFilter === "ALL" || record.attendanceStatus === statusFilter;
+      const employeeMatch = !query || searchable.includes(query);
+      const statusMatch = statusFilter === "ALL" || getStatus(record) === statusFilter;
+      const dateMatch = !dateFilter || getDate(record) === dateFilter;
 
-    const dateMatch = !dateFilter || record.attendanceDate === dateFilter;
+      return employeeMatch && statusMatch && dateMatch;
+    });
+  }, [attendance, dateFilter, search, statusFilter]);
 
-    return employeeMatch && statusMatch && dateMatch;
-  });
+  const presentCount = statusCounts.PRESENT || 0;
+  const absentCount = statusCounts.ABSENT || 0;
+  const leaveCount = statusCounts.LEAVE || 0;
+  const attendanceRate = attendance.length
+    ? Math.round((presentCount / attendance.length) * 100)
+    : 0;
 
-  const totalPresent = attendance.filter(
-    (item) => item.attendanceStatus === "PRESENT",
-  ).length;
-
-  const totalAbsent = attendance.filter(
-    (item) => item.attendanceStatus === "ABSENT",
-  ).length;
-
-  const totalLeave = attendance.filter(
-    (item) => item.attendanceStatus === "LEAVE",
-  ).length;
+  const chartItems = Object.entries(statusCounts)
+    .map(([label, value]) => ({ label, value }))
+    .sort((a, b) => b.value - a.value);
 
   return (
-    <div className="container-fluid">
-      <h2 className="mb-4">Attendance Management</h2>
+    <EnterprisePage>
+      <PageHero
+        eyebrow="Attendance Management"
+        title="Attendance Operations"
+        description="Track daily attendance, monitor exceptions, and filter records by employee, date, and status."
+        icon={FiClock}
+        meta={
+          <>
+            <span>{filteredAttendance.length} visible records</span>
+            <span>{attendanceRate}% present rate</span>
+          </>
+        }
+        actions={
+          <button
+            type="button"
+            className="btn btn-light"
+            onClick={loadAttendance}
+            disabled={loading}
+          >
+            <FiRefreshCw /> Refresh
+          </button>
+        }
+      />
 
-      {/* Summary Cards */}
+      <ErrorBanner message={error} onRetry={loadAttendance} />
 
-      <div className="row mb-4">
-        <div className="col-md-3">
-          <div className="card text-center shadow-sm">
-            <div className="card-body">
-              <h6>Total Records</h6>
-              <h3>{attendance.length}</h3>
-            </div>
+      <section className="enterprise-grid">
+        <MetricCard
+          label="Total Records"
+          value={attendance.length}
+          helper="Loaded attendance entries"
+          icon={FiUsers}
+          tone="blue"
+        />
+        <MetricCard
+          label="Present"
+          value={presentCount}
+          helper={`${attendanceRate}% of records`}
+          icon={FiCheckCircle}
+          tone="green"
+        />
+        <MetricCard
+          label="Absent"
+          value={absentCount}
+          helper="Needs attention"
+          icon={FiXCircle}
+          tone="red"
+        />
+        <MetricCard
+          label="Leave"
+          value={leaveCount}
+          helper="Approved or marked leaves"
+          icon={FiCalendar}
+          tone="gold"
+        />
+      </section>
+
+      <section className="enterprise-panel">
+        <div className="enterprise-panel-header">
+          <div>
+            <h2>Attendance Register</h2>
+            <p>Use filters together to isolate exceptions or verify a date.</p>
           </div>
         </div>
 
-        <div className="col-md-3">
-          <div className="card text-center shadow-sm">
-            <div className="card-body">
-              <h6>Present</h6>
-              <h3>{totalPresent}</h3>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3">
-          <div className="card text-center shadow-sm">
-            <div className="card-body">
-              <h6>Absent</h6>
-              <h3>{totalAbsent}</h3>
-            </div>
-          </div>
-        </div>
-
-        <div className="col-md-3">
-          <div className="card text-center shadow-sm">
-            <div className="card-body">
-              <h6>Leave</h6>
-              <h3>{totalLeave}</h3>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-
-      <div className="row mb-4">
-        <div className="col-md-4">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search Employee"
+        <div className="enterprise-toolbar">
+          <SearchField
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={setSearch}
+            placeholder="Search employee, department, status..."
           />
-        </div>
 
-        <div className="col-md-4">
           <input
             type="date"
             className="form-control"
             value={dateFilter}
-            onChange={(e) => setDateFilter(e.target.value)}
+            onChange={(event) => setDateFilter(event.target.value)}
+            aria-label="Filter attendance by date"
           />
-        </div>
 
-        <div className="col-md-4">
           <select
             className="form-select"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(event) => setStatusFilter(event.target.value)}
+            aria-label="Filter attendance by status"
           >
-            <option value="ALL">All Status</option>
-
-            <option value="PRESENT">PRESENT</option>
-
-            <option value="ABSENT">ABSENT</option>
-
-            <option value="LEAVE">LEAVE</option>
-
-            <option value="HALF_DAY">HALF DAY</option>
-
-            <option value="WEEK_OFF">WEEK OFF</option>
-
-            <option value="HOLIDAY">HOLIDAY</option>
+            <option value="ALL">All Statuses</option>
+            <option value="PRESENT">Present</option>
+            <option value="ABSENT">Absent</option>
+            <option value="LEAVE">Leave</option>
+            <option value="HALF_DAY">Half Day</option>
+            <option value="WEEK_OFF">Week Off</option>
+            <option value="HOLIDAY">Holiday</option>
           </select>
         </div>
-      </div>
 
-      {/* Attendance Table */}
-
-      <div className="table-responsive">
-        <table className="table table-bordered table-hover">
-          <thead className="table-dark">
-            <tr>
-              <th>ID</th>
-              <th>Employee</th>
-              <th>Department</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Punch In</th>
-              <th>Punch Out</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredAttendance.length > 0 ? (
-              filteredAttendance.map((record) => (
-                <tr key={record.attendanceId}>
-                  <td>{record.employeeId}</td>
-
-                  <td>{record.employeeName}</td>
-
-                  <td>{record.department || "-"}</td>
-
-                  <td>{record.attendanceDate}</td>
-
-                  <td>
-                    <span
-                      className={`badge ${
-                        record.attendanceStatus === "PRESENT"
-                          ? "bg-success"
-                          : record.attendanceStatus === "ABSENT"
-                            ? "bg-danger"
-                            : record.attendanceStatus === "LEAVE"
-                              ? "bg-warning text-dark"
-                              : "bg-secondary"
-                      }`}
-                    >
-                      {record.attendanceStatus}
-                    </span>
-                  </td>
-
-                  <td>{record.punchInTime || "-"}</td>
-
-                  <td>{record.punchOutTime || "-"}</td>
+        {loading ? (
+          <LoadingState label="Loading attendance..." />
+        ) : attendance.length === 0 ? (
+          <EmptyState
+            title="No attendance records"
+            message="Attendance records will appear here after check-ins or imports."
+          />
+        ) : (
+          <div className="enterprise-table-wrap">
+            <table className="enterprise-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Employee</th>
+                  <th>Department</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Punch In</th>
+                  <th>Punch Out</th>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7">No Attendance Records Found</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+              </thead>
+              <tbody>
+                {filteredAttendance.length > 0 ? (
+                  filteredAttendance.map((record) => (
+                    <tr key={record.attendanceId || `${record.employeeId}-${getDate(record)}`}>
+                      <td>{record.employeeId || "-"}</td>
+                      <td>
+                        <span className="enterprise-row-title">
+                          <span className="enterprise-avatar">
+                            {getName(record).charAt(0).toUpperCase()}
+                          </span>
+                          <span>
+                            <strong>{getName(record)}</strong>
+                            <span className="enterprise-subtext">
+                              {record.employeeCode || "Employee record"}
+                            </span>
+                          </span>
+                        </span>
+                      </td>
+                      <td>{record.department || "-"}</td>
+                      <td>{formatDate(getDate(record))}</td>
+                      <td>
+                        <StatusBadge status={getStatus(record)} />
+                      </td>
+                      <td>{record.punchInTime || "-"}</td>
+                      <td>{record.punchOutTime || "-"}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7">
+                      <EmptyState
+                        title="No matching attendance"
+                        message="Try adjusting the search, date, or status filter."
+                      />
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {chartItems.length > 0 && (
+        <section className="enterprise-panel">
+          <div className="enterprise-panel-header">
+            <div>
+              <h3>Status Distribution</h3>
+              <p>Live view of attendance statuses across loaded records.</p>
+            </div>
+            <FiTrendingUp />
+          </div>
+          <MiniBarChart items={chartItems} valueLabel="records" />
+        </section>
+      )}
+    </EnterprisePage>
   );
 }
 

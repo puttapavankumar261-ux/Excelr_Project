@@ -8,6 +8,9 @@ import { onboardEmployee } from "../services/employeeService";
 
 function AddEmployeeWizard({ onClose, onSuccess }) {
   const [step, setStep] = useState(1);
+  const [errors, setErrors] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const [formData, setFormData] = useState({
     employeename: "",
@@ -35,8 +38,50 @@ function AddEmployeeWizard({ onClose, onSuccess }) {
     ifscCode: "",
   });
 
+  const validateStep = (targetStep = step) => {
+    const nextErrors = {};
+
+    if (targetStep === 1) {
+      if (!formData.employeename.trim()) nextErrors.employeename = "Employee name is required.";
+      if (!formData.companyemail.trim()) {
+        nextErrors.companyemail = "Company email is required.";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.companyemail)) {
+        nextErrors.companyemail = "Enter a valid company email.";
+      }
+      if (!formData.role) nextErrors.role = "Role is required.";
+      if (!formData.designation) nextErrors.designation = "Designation is required.";
+      if (!formData.department) nextErrors.department = "Department is required.";
+      if (!formData.employmentType) nextErrors.employmentType = "Employment type is required.";
+    }
+
+    if (targetStep === 2) {
+      if (Number(formData.basicSalary || 0) <= 0) {
+        nextErrors.basicSalary = "Basic salary must be greater than zero.";
+      }
+    }
+
+    if (targetStep === 3) {
+      if (formData.ifscCode && !/^[A-Z]{4}0[A-Z0-9]{6}$/i.test(formData.ifscCode)) {
+        nextErrors.ifscCode = "Enter a valid IFSC code.";
+      }
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const goNext = () => {
+    if (validateStep(step)) {
+      setStep((current) => Math.min(current + 1, 3));
+    }
+  };
+
   const handleSubmit = async () => {
+    if (!validateStep(3)) return;
+
     try {
+      setSubmitting(true);
+      setSubmitError("");
       const payload = {
         employee: {
           employeename: formData.employeename,
@@ -75,11 +120,8 @@ function AddEmployeeWizard({ onClose, onSuccess }) {
 
       await onboardEmployee(payload);
 
-      alert(
-        `Employee Created Successfully
-
-Username: ${formData.companyemail}
-Password: ${formData.companyemail}`,
+      window.alert(
+        `Employee created successfully.\n\nUsername: ${formData.companyemail}\nPassword: ${formData.companyemail}`,
       );
 
       if (onSuccess) {
@@ -92,11 +134,13 @@ Password: ${formData.companyemail}`,
     } catch (error) {
       console.error(error);
 
-      alert(
+      setSubmitError(
         error.response?.data?.message ||
           error.response?.data ||
           "Failed to onboard employee",
       );
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -107,6 +151,12 @@ Password: ${formData.companyemail}`,
           <div className="card shadow border-0">
             <div className="card-body p-4">
               <h2 className="mb-4">Employee Onboarding Wizard</h2>
+
+              {submitError && (
+                <div className="alert alert-danger" role="alert">
+                  {submitError}
+                </div>
+              )}
 
               <div className="progress mb-4">
                 <div
@@ -138,7 +188,8 @@ Password: ${formData.companyemail}`,
                 <EmployeeStep1
                   formData={formData}
                   setFormData={setFormData}
-                  nextStep={() => setStep(2)}
+                  errors={errors}
+                  nextStep={goNext}
                 />
               )}
 
@@ -146,7 +197,8 @@ Password: ${formData.companyemail}`,
                 <EmployeeStep2
                   formData={formData}
                   setFormData={setFormData}
-                  nextStep={() => setStep(3)}
+                  errors={errors}
+                  nextStep={goNext}
                   prevStep={() => setStep(1)}
                 />
               )}
@@ -155,8 +207,10 @@ Password: ${formData.companyemail}`,
                 <EmployeeStep3
                   formData={formData}
                   setFormData={setFormData}
+                  errors={errors}
                   prevStep={() => setStep(2)}
                   handleSubmit={handleSubmit}
+                  submitting={submitting}
                 />
               )}
             </div>

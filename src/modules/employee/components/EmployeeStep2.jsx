@@ -1,4 +1,4 @@
-function EmployeeStep2({ formData, setFormData, nextStep, prevStep }) {
+function EmployeeStep2({ formData, setFormData, errors = {}, nextStep, prevStep }) {
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -11,14 +11,21 @@ function EmployeeStep2({ formData, setFormData, nextStep, prevStep }) {
       <h3>Step 2 - Salary Package Details</h3>
 
       <input
-        className="form-control mb-3"
+        type="number"
+        min="0"
+        className={`form-control mb-1 ${errors.basicSalary ? "is-invalid" : ""}`}
         placeholder="Basic Salary"
         name="basicSalary"
         value={formData.basicSalary || ""}
         onChange={handleChange}
       />
+      {errors.basicSalary && (
+        <div className="invalid-feedback d-block mb-2">{errors.basicSalary}</div>
+      )}
 
       <input
+        type="number"
+        min="0"
         className="form-control mb-3"
         placeholder="HRA"
         name="hra"
@@ -27,6 +34,8 @@ function EmployeeStep2({ formData, setFormData, nextStep, prevStep }) {
       />
 
       <input
+        type="number"
+        min="0"
         className="form-control mb-3"
         placeholder="Special Allowance"
         name="allowances"
@@ -35,6 +44,8 @@ function EmployeeStep2({ formData, setFormData, nextStep, prevStep }) {
       />
 
       <input
+        type="number"
+        min="0"
         className="form-control mb-3"
         placeholder="Bonus"
         name="bonus"
@@ -43,6 +54,8 @@ function EmployeeStep2({ formData, setFormData, nextStep, prevStep }) {
       />
 
       <input
+        type="number"
+        min="0"
         className="form-control mb-3"
         placeholder="PF Contribution"
         name="pf"
@@ -51,6 +64,8 @@ function EmployeeStep2({ formData, setFormData, nextStep, prevStep }) {
       />
 
       <input
+        type="number"
+        min="0"
         className="form-control mb-3"
         placeholder="Professional Tax"
         name="professionalTax"
@@ -59,6 +74,8 @@ function EmployeeStep2({ formData, setFormData, nextStep, prevStep }) {
       />
 
       <input
+        type="number"
+        min="0"
         className="form-control mb-3"
         placeholder="Medical Allowance"
         name="medicalAllowance"
@@ -67,6 +84,8 @@ function EmployeeStep2({ formData, setFormData, nextStep, prevStep }) {
       />
 
       <input
+        type="number"
+        min="0"
         className="form-control mb-3"
         placeholder="Annual CTC"
         name="annualCtc"

@@ -1,212 +1,295 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { FiCheckCircle, FiClock, FiRefreshCw, FiXCircle } from "react-icons/fi";
+
 import {
-  getAllLeaves,
-  teamLeadApproveLeave,
-  managerApproveLeave,
-  hrApproveLeave,
-  finalApproveLeave,
-  rejectLeave,
+  EmptyState,
+  EnterprisePage,
+  ErrorBanner,
+  LoadingState,
+  MetricCard,
+  PageHero,
+  SearchField,
+  StatusBadge,
+} from "../../../components/ui/EnterpriseUI";
+import { formatDate } from "../../../components/ui/formatters";
+import { getApiErrorMessage } from "../../../api/errorUtils";
+import {
   cancelLeave,
+  finalApproveLeave,
+  getAllLeaves,
+  hrApproveLeave,
+  managerApproveLeave,
+  rejectLeave,
+  teamLeadApproveLeave,
 } from "../services/leaveService";
+
+const terminalStatuses = ["APPROVED", "REJECTED", "CANCELLED"];
 
 function LeaveApproval() {
   const [leaves, setLeaves] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [error, setError] = useState("");
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const approverId = user?.id;
-
-  useEffect(() => {
-    loadLeaves();
-  }, []);
+  const approverId = user?.id || 1;
 
   const loadLeaves = async () => {
     try {
+      setLoading(true);
+      setError("");
       const response = await getAllLeaves();
       setLeaves(response.data || []);
-    } catch (error) {
-      console.error("Error loading leaves:", error);
+    } catch (loadError) {
+      console.error("Error loading leaves:", loadError);
+      setError(getApiErrorMessage(loadError, "Unable to load leave approvals."));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleTeamLeadApprove = async (leaveId) => {
-    try {
-      await teamLeadApproveLeave(leaveId, approverId);
-      loadLeaves();
-    } catch (error) {
-      console.error(error);
-    }
-  };
+  useEffect(() => {
+    loadLeaves();
+  }, []);
 
-  const handleManagerApprove = async (leaveId) => {
+  const runAction = async (leaveId, action) => {
     try {
-      await managerApproveLeave(leaveId, approverId);
-      loadLeaves();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleHrApprove = async (leaveId) => {
-    try {
-      await hrApproveLeave(leaveId, approverId);
-      loadLeaves();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleFinalApprove = async (leaveId) => {
-    try {
-      await finalApproveLeave(leaveId);
-      loadLeaves();
-    } catch (error) {
-      console.error(error);
+      setActionLoadingId(leaveId);
+      setError("");
+      await action();
+      await loadLeaves();
+    } catch (actionError) {
+      console.error(actionError);
+      setError(getApiErrorMessage(actionError, "Leave approval action failed."));
+    } finally {
+      setActionLoadingId(null);
     }
   };
 
   const handleReject = async (leaveId) => {
-    const reason = prompt("Enter rejection reason");
-
-    if (!reason) return;
-
-    try {
-      await rejectLeave(leaveId, approverId, reason);
-      loadLeaves();
-    } catch (error) {
-      console.error(error);
-    }
+    const reason = window.prompt("Enter rejection reason");
+    if (!reason?.trim()) return;
+    runAction(leaveId, () => rejectLeave(leaveId, approverId, reason.trim()));
   };
 
-  const handleCancel = async (leaveId) => {
-    if (!window.confirm("Cancel this leave?")) {
-      return;
-    }
-
-    try {
-      await cancelLeave(leaveId);
-      loadLeaves();
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="container-fluid p-4">
-        <h4>Loading Leave Requests...</h4>
-      </div>
+  const filteredLeaves = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return leaves.filter((leave) =>
+      [
+        leave.employeeName,
+        leave.employeeId,
+        leave.department,
+        leave.leaveType,
+        leave.approvalStatus,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(query),
     );
-  }
+  }, [leaves, search]);
+
+  const pendingLeaves = leaves.filter(
+    (leave) => !terminalStatuses.includes(leave.approvalStatus),
+  );
+  const approvedLeaves = leaves.filter((leave) => leave.approvalStatus === "APPROVED");
+  const rejectedLeaves = leaves.filter((leave) => leave.approvalStatus === "REJECTED");
 
   return (
-    <div className="container-fluid p-4">
-      <div className="card shadow-sm">
-        <div className="card-body">
-          <h2>Leave Approval Management</h2>
+    <EnterprisePage>
+      <PageHero
+        eyebrow="Leave Approval"
+        title="Approval Queue"
+        description="Process leave requests at each approval stage with clear status and action visibility."
+        icon={FiClock}
+        meta={
+          <>
+            <span>{pendingLeaves.length} pending requests</span>
+            <span>{filteredLeaves.length} visible rows</span>
+          </>
+        }
+        actions={
+          <button
+            type="button"
+            className="btn btn-light"
+            onClick={loadLeaves}
+            disabled={loading}
+          >
+            <FiRefreshCw /> Refresh
+          </button>
+        }
+      />
 
-          <hr />
+      <ErrorBanner message={error} onRetry={loadLeaves} />
 
-          <div className="table-responsive">
-            <table className="table table-bordered table-hover">
-              <thead className="table-dark">
+      <section className="enterprise-grid">
+        <MetricCard
+          label="Pending"
+          value={pendingLeaves.length}
+          helper="Ready for action"
+          icon={FiClock}
+          tone="gold"
+        />
+        <MetricCard
+          label="Approved"
+          value={approvedLeaves.length}
+          helper="Approved requests"
+          icon={FiCheckCircle}
+          tone="green"
+        />
+        <MetricCard
+          label="Rejected"
+          value={rejectedLeaves.length}
+          helper="Rejected requests"
+          icon={FiXCircle}
+          tone="red"
+        />
+      </section>
+
+      <section className="enterprise-panel">
+        <div className="enterprise-panel-header">
+          <div>
+            <h2>Approval Queue</h2>
+            <p>Search employees, departments, leave types, or approval statuses.</p>
+          </div>
+        </div>
+
+        <div className="enterprise-toolbar">
+          <SearchField
+            value={search}
+            onChange={setSearch}
+            placeholder="Search approval queue..."
+          />
+        </div>
+
+        {loading ? (
+          <LoadingState label="Loading leave approvals..." />
+        ) : leaves.length === 0 ? (
+          <EmptyState
+            title="No leave requests found"
+            message="There are no approvals to process right now."
+          />
+        ) : (
+          <div className="enterprise-table-wrap" aria-busy={!!actionLoadingId}>
+            <table className="enterprise-table">
+              <thead>
                 <tr>
                   <th>ID</th>
                   <th>Employee</th>
                   <th>Department</th>
                   <th>Leave Type</th>
-                  <th>Start Date</th>
-                  <th>End Date</th>
+                  <th>Start</th>
+                  <th>End</th>
                   <th>Days</th>
                   <th>Status</th>
-                  <th width="450">Actions</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-
               <tbody>
-                {leaves.length > 0 ? (
-                  leaves.map((leave) => (
-                    <tr key={leave.leaveId}>
-                      <td>{leave.leaveId}</td>
-
-                      <td>{leave.employeeName}</td>
-
-                      <td>{leave.department}</td>
-
-                      <td>{leave.leaveType}</td>
-
-                      <td>{leave.leaveStartDate}</td>
-
-                      <td>{leave.leaveEndDate}</td>
-
-                      <td>{leave.leaveDays}</td>
-
-                      <td>
-                        <span className="badge bg-info">
-                          {leave.approvalStatus}
+                {filteredLeaves.map((leave) => (
+                  <tr key={leave.leaveId}>
+                    <td>{leave.leaveId}</td>
+                    <td>
+                      <span className="enterprise-row-title">
+                        <span className="enterprise-avatar">
+                          {(leave.employeeName || "E").charAt(0).toUpperCase()}
                         </span>
-                      </td>
-
-                      <td>
+                        <span>
+                          <strong>{leave.employeeName || "Employee"}</strong>
+                          <span className="enterprise-subtext">
+                            Employee #{leave.employeeId || "-"}
+                          </span>
+                        </span>
+                      </span>
+                    </td>
+                    <td>{leave.department || "-"}</td>
+                    <td>{leave.leaveType || "-"}</td>
+                    <td>{formatDate(leave.leaveStartDate)}</td>
+                    <td>{formatDate(leave.leaveEndDate)}</td>
+                    <td>{leave.leaveDays || "-"}</td>
+                    <td>
+                      <StatusBadge status={leave.approvalStatus} />
+                    </td>
+                    <td>
+                      <div className="enterprise-actions">
                         <button
-                          className="btn btn-primary btn-sm me-1"
-                          onClick={() => handleTeamLeadApprove(leave.leaveId)}
+                          type="button"
+                          className="btn btn-outline-primary btn-sm"
+                          onClick={() =>
+                            runAction(leave.leaveId, () =>
+                              teamLeadApproveLeave(leave.leaveId, approverId),
+                            )
+                          }
+                          disabled={actionLoadingId === leave.leaveId}
                         >
                           Team Lead
                         </button>
-
                         <button
-                          className="btn btn-warning btn-sm me-1"
-                          onClick={() => handleManagerApprove(leave.leaveId)}
+                          type="button"
+                          className="btn btn-outline-warning btn-sm"
+                          onClick={() =>
+                            runAction(leave.leaveId, () =>
+                              managerApproveLeave(leave.leaveId, approverId),
+                            )
+                          }
+                          disabled={actionLoadingId === leave.leaveId}
                         >
                           Manager
                         </button>
-
                         <button
-                          className="btn btn-info btn-sm me-1"
-                          onClick={() => handleHrApprove(leave.leaveId)}
+                          type="button"
+                          className="btn btn-outline-info btn-sm"
+                          onClick={() =>
+                            runAction(leave.leaveId, () =>
+                              hrApproveLeave(leave.leaveId, approverId),
+                            )
+                          }
+                          disabled={actionLoadingId === leave.leaveId}
                         >
                           HR
                         </button>
-
                         <button
-                          className="btn btn-success btn-sm me-1"
-                          onClick={() => handleFinalApprove(leave.leaveId)}
+                          type="button"
+                          className="btn btn-outline-success btn-sm"
+                          onClick={() =>
+                            runAction(leave.leaveId, () =>
+                              finalApproveLeave(leave.leaveId),
+                            )
+                          }
+                          disabled={actionLoadingId === leave.leaveId}
                         >
                           Final
                         </button>
-
                         <button
-                          className="btn btn-danger btn-sm me-1"
+                          type="button"
+                          className="btn btn-outline-danger btn-sm"
                           onClick={() => handleReject(leave.leaveId)}
+                          disabled={actionLoadingId === leave.leaveId}
                         >
                           Reject
                         </button>
-
                         <button
-                          className="btn btn-secondary btn-sm"
-                          onClick={() => handleCancel(leave.leaveId)}
+                          type="button"
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() =>
+                            window.confirm("Cancel this leave?") &&
+                            runAction(leave.leaveId, () => cancelLeave(leave.leaveId))
+                          }
+                          disabled={actionLoadingId === leave.leaveId}
                         >
                           Cancel
                         </button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="9" className="text-center">
-                      No Leave Requests Found
+                      </div>
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
-    </div>
+        )}
+      </section>
+    </EnterprisePage>
   );
 }
 

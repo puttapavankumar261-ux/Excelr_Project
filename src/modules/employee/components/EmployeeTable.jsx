@@ -1,7 +1,13 @@
+import { FiEdit2, FiEye, FiTrash2 } from "react-icons/fi";
+import { StatusBadge } from "../../../components/ui/EnterpriseUI";
+
 function EmployeeTable({ employees, onView, onEdit, onDelete }) {
+  const getName = (employee) =>
+    employee.employeename || employee.employeeName || "Unnamed Employee";
+
   return (
-    <table className="table table-hover table-bordered">
-      <thead className="table-dark">
+    <table className="enterprise-table">
+      <thead>
         <tr>
           <th>ID</th>
           <th>Name</th>
@@ -10,7 +16,7 @@ function EmployeeTable({ employees, onView, onEdit, onDelete }) {
           <th>Role</th>
           <th>Status</th>
           <th>Location</th>
-          <th width="220">Actions</th>
+          <th>Actions</th>
         </tr>
       </thead>
 
@@ -19,41 +25,63 @@ function EmployeeTable({ employees, onView, onEdit, onDelete }) {
           employees.map((employee) => (
             <tr key={employee.employeeid}>
               <td>{employee.employeeid}</td>
-              <td>{employee.employeename}</td>
-              <td>{employee.department}</td>
-              <td>{employee.designation}</td>
-              <td>{employee.role}</td>
-              <td>{employee.employmentStatus}</td>
-              <td>{employee.workLocation}</td>
-
               <td>
-                <button
-                  className="btn btn-info btn-sm me-2"
-                  onClick={() => onView(employee.employeeid)}
-                >
-                  View
-                </button>
-
-                <button
-                  className="btn btn-warning btn-sm me-2"
-                  onClick={() => onEdit(employee.employeeid)}
-                >
-                  Edit
-                </button>
-
-                <button
-                  className="btn btn-danger btn-sm"
-                  onClick={() => onDelete(employee.employeeid)}
-                >
-                  Delete
-                </button>
+                <span className="enterprise-row-title">
+                  <span className="enterprise-avatar">
+                    {getName(employee).charAt(0).toUpperCase()}
+                  </span>
+                  <span>
+                    <strong>{getName(employee)}</strong>
+                    <span className="enterprise-subtext">
+                      {employee.companyemail || employee.email || "No email"}
+                    </span>
+                  </span>
+                </span>
+              </td>
+              <td>{employee.department || "-"}</td>
+              <td>{employee.designation || "-"}</td>
+              <td>{employee.role || "-"}</td>
+              <td>
+                <StatusBadge status={employee.employmentStatus || "ACTIVE"} />
+              </td>
+              <td>{employee.workLocation || "-"}</td>
+              <td>
+                <div className="enterprise-actions">
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm"
+                    onClick={() => onView(employee.employeeid)}
+                    aria-label={`View ${getName(employee)}`}
+                  >
+                    <FiEye /> View
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={() => onEdit(employee.employeeid)}
+                    aria-label={`Edit ${getName(employee)}`}
+                  >
+                    <FiEdit2 /> Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-outline-danger btn-sm"
+                    onClick={() => onDelete(employee.employeeid)}
+                    aria-label={`Delete ${getName(employee)}`}
+                  >
+                    <FiTrash2 /> Delete
+                  </button>
+                </div>
               </td>
             </tr>
           ))
         ) : (
           <tr>
-            <td colSpan="8" className="text-center">
-              No Employees Found
+            <td colSpan="8">
+              <div className="enterprise-state">
+                <strong>No employees found</strong>
+                <span>Try changing the search or filter criteria.</span>
+              </div>
             </td>
           </tr>
         )}
