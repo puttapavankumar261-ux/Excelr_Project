@@ -352,46 +352,26 @@ public class AttendanceService {
 		attendance.setAttendanceStatus(calculateAttendanceStatus(attendance));
 	}
 
-	private AttendanceStatus calculateAttendanceStatus(AttendanceEntity attendance) {
+	private AttendanceStatus calculateAttendanceStatus(
+	        AttendanceEntity attendance) {
 
-		if (attendance.getPublicHoliday() != null) {
-			return AttendanceStatus.HOLIDAY;
-		}
+	    if (attendance.getPublicHoliday() != null) {
+	        return AttendanceStatus.HOLIDAY;
+	    }
 
-		if (attendance.getWeekOff() != null) {
-			return AttendanceStatus.WEEK_OFF;
-		}
+	    if (attendance.getWeekOff() != null) {
+	        return AttendanceStatus.WEEK_OFF;
+	    }
 
-		if (attendance.getLeave() != null) {
-			return AttendanceStatus.LEAVE;
-		}
+	    if (attendance.getLeave() != null) {
+	        return AttendanceStatus.LEAVE;
+	    }
 
-		if (attendance.getPunchInTime() == null) {
-			return AttendanceStatus.ABSENT;
-		}
+	    if (attendance.getPunchInTime() != null) {
+	        return AttendanceStatus.PRESENT;
+	    }
 
-		if (attendance.getPunchOutTime() == null) {
-			return AttendanceStatus.PRESENT;
-		}
-
-		Long totalWorkMinutes = calculateTotalWorkMinutes(attendance);
-		long minWorkMinutes = 8 * 60;
-
-		if (attendance.getShift() != null && attendance.getShift().getMinWorkHours() != null) {
-			minWorkMinutes = attendance.getShift().getMinWorkHours()
-					.multiply(BigDecimal.valueOf(60))
-					.longValue();
-		}
-
-		if (totalWorkMinutes == 0) {
-		    return AttendanceStatus.PRESENT;
-		}
-
-		if (totalWorkMinutes < minWorkMinutes) {
-		    return AttendanceStatus.HALF_DAY;
-		}
-
-		return AttendanceStatus.PRESENT;
+	    return AttendanceStatus.ABSENT;
 	}
 
 	private Long calculateTotalWorkMinutes(AttendanceEntity attendance) {
@@ -402,9 +382,11 @@ public class AttendanceService {
 
 		long totalOfficeMinutes = calculateDurationMinutes(attendance, attendance.getPunchInTime(),
 				attendance.getPunchOutTime());
-		long breakMinutes = 60;
+		if (totalOfficeMinutes <= 60) {
+		    return totalOfficeMinutes;
+		}
 
-		return Math.max(totalOfficeMinutes - breakMinutes, 0);
+		return totalOfficeMinutes - 60;
 	}
 
 	private Long calculateOvertimeMinutes(AttendanceEntity attendance) {
@@ -490,6 +472,18 @@ public class AttendanceService {
 	            .map(this::convertToDTO)
 	            .collect(Collectors.toList());
 	}
+	
+	public List<AttendanceDTO> getAttendanceHistory(
+	        Integer employeeId) {
+
+	    return attendanceRepo1
+	            .findByEmployeeEmployeeidOrderByAttendanceDateDesc(
+	                    employeeId)
+	            .stream()
+	            .map(this::convertToDTO)
+	            .collect(Collectors.toList());
+	}
+	
 	private AttendanceDTO convertToDTO(
 	        AttendanceEntity attendance) {
 
@@ -511,6 +505,15 @@ public class AttendanceService {
 
 	    dto.setPunchOutTime(
 	            attendance.getPunchOutTime());
+	    
+	    dto.setTotalWorkMinutes(
+	            attendance.getTotalWorkMinutes());
+
+	    dto.setLateByMinutes(
+	            attendance.getLateByMinutes());
+
+	    dto.setOvertimeMinutes(
+	            attendance.getOvertimeMinutes());
 
 	    if (attendance.getEmployee() != null) {
 
@@ -594,8 +597,9 @@ public class AttendanceService {
 	            new AttendanceSummaryDTO();
 
 	    List<AttendanceEntity> attendances =
-	            attendanceRepo1
-	                    .findByEmployeeEmployeeid(employeeId);
+	    		attendanceRepo1
+	    		.findByEmployeeEmployeeidOrderByAttendanceDateDesc(
+	    		        employeeId);
 
 	    int present = 0;
 	    int leave = 0;

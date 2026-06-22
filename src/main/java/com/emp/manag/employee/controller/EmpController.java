@@ -14,8 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.emp.manag.config.dto.EmployeeOnboardingRequest;
 import com.emp.manag.employee.entity.EmpEntity;
+import com.emp.manag.employee.security.SessionRoleUtil;
 import com.emp.manag.employee.service.EmpService;
 import com.emp.manag.schedule.entity.ShiftEntity;
+
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/api/employee-management")
@@ -24,11 +27,19 @@ public class EmpController {
 	@Autowired
 	private EmpService service;
 
+	@Autowired
+	private HttpSession session;
+	
 	@PostMapping("/Saveemp")
-	public EmpEntity saveEmployee(@RequestBody EmpEntity employee) {
-		System.out.println("===== REQUEST RECEIVED =====");
-		System.out.println("Employee Data Saved");
-		return service.saveEmployee(employee);
+	public EmpEntity saveEmployee(
+	        @RequestBody EmpEntity employee) {
+
+	    SessionRoleUtil.requireAdmin(session);
+
+	    System.out.println("===== REQUEST RECEIVED =====");
+	    System.out.println("Employee Data Saved");
+
+	    return service.saveEmployee(employee);
 	}
 	
 	@PostMapping("/onboardemployee")
@@ -39,9 +50,17 @@ public class EmpController {
 	}
 
 	@PutMapping("/Update/{employeeId}")
-	public String updateEmployee(@PathVariable Integer employeeId, @RequestBody EmpEntity employee) {
-		System.out.println("Employee Data Updated");
-		return service.updateEmployee(employeeId, employee);
+	public String updateEmployee(
+	        @PathVariable Integer employeeId,
+	        @RequestBody EmpEntity employee) {
+
+	    SessionRoleUtil.requireAdmin(session);
+
+	    System.out.println("Employee Data Updated");
+
+	    return service.updateEmployee(
+	            employeeId,
+	            employee);
 	}
 
 	@GetMapping("/GetAllEmp")
@@ -81,26 +100,16 @@ public class EmpController {
 	public String deleteEmployee(
 	        @PathVariable Integer employeeId) {
 
+	    SessionRoleUtil.requireAdmin(session);
+
 	    System.out.println(
 	            "DELETE REQUEST FOR EMPLOYEE : "
 	            + employeeId);
 
-	    try {
-
-	        return service.deleteEmployee(
-	                employeeId);
-
-	    } catch (Exception e) {
-
-	        e.printStackTrace();
-
-	        throw e;
-	    }
+	    return service.deleteEmployee(employeeId);
 	}
 	@DeleteMapping("/DeleteAllEmp")
 	public String deleteAllEmployees() {
 		return service.deleteAllEmployees();
 	}
-
-
 }

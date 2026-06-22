@@ -88,4 +88,11 @@ public class EmpLoginController {
 	                    request.getCurrentPassword(),
 	                    request.getNewPassword()));
 	}
+	
+	@GetMapping("/employee/me")
+	public SessionResponse me(
+	        HttpSession session) {
+
+	    return empLoginService.getSession(session);
+	}
 }

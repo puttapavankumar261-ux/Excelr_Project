@@ -56,15 +56,19 @@ public class EmpEntity {
     @Column(name = "company_email")
     private String companyemail;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "shift_id")
+    @JsonIgnoreProperties({
+        "hibernateLazyInitializer",
+        "handler"
+    })
     private ShiftEntity shift;
 
     @Column(name = "image")
     private String image;
 
     @JsonIgnore
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "manager_id")
     private EmpEntity manager;
 

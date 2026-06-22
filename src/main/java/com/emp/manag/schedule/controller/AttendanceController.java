@@ -155,4 +155,13 @@ public class AttendanceController {
 
         return service.getAttendanceSummary(employeeId);
     }
+    
+    @GetMapping(
+            "/attendance/history/{employeeId}")
+    public List<AttendanceDTO> getAttendanceHistory(
+            @PathVariable Integer employeeId) {
+
+        return service.getAttendanceHistory(
+                employeeId);
+    }
 }

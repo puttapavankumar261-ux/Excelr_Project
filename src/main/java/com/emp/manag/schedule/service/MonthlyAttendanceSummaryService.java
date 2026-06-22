@@ -134,4 +134,13 @@ public class MonthlyAttendanceSummaryService {
 
 		return YearMonth.of(year, month);
 	}
+	
+	public List<MonthlyAttendanceSummaryEntity>
+	getEmployeeSummaryHistory(
+	        Integer employeeId) {
+
+	    return monthlySummaryRepo
+	            .findByEmployeeEmployeeid(
+	                    employeeId);
+	}
 }

@@ -23,4 +23,10 @@ public class AttendanceDTO {
     private LocalTime punchInTime;
 
     private LocalTime punchOutTime;
+
+    private Long totalWorkMinutes;
+
+    private Long lateByMinutes;
+
+    private Long overtimeMinutes;
 }

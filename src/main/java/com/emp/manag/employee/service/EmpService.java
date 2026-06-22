@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +32,9 @@ public class EmpService {
 	@Autowired
 	private EmpLoginRepo loginRepo;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	public EmpEntity assignShift(
 	        Integer employeeId,
 	        Integer shiftId) {
@@ -189,8 +193,10 @@ public class EmpService {
 	            savedEmployee.getCompanyemail());
 
 	    // Default Password = Company Email
+	 // Default Password = Company Email (encrypted)
 	    login.setPasswordHash(
-	            savedEmployee.getCompanyemail());
+	            passwordEncoder.encode(
+	                    savedEmployee.getCompanyemail()));
 
 	    // Role from Employee
 	    login.setRole(

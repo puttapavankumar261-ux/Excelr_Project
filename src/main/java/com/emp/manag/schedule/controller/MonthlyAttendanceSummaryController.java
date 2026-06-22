@@ -42,6 +42,17 @@ public class MonthlyAttendanceSummaryController {
 		return monthlyAttendanceSummaryService.getAllSummaries();
 	}
 
+	@GetMapping(
+	        "/monthlysummaryhistory/{employeeId}")
+	public List<MonthlyAttendanceSummaryEntity>
+	getEmployeeSummaryHistory(
+	        @PathVariable Integer employeeId) {
+
+	    return monthlyAttendanceSummaryService
+	            .getEmployeeSummaryHistory(
+	                    employeeId);
+	}
+	
 	@DeleteMapping("/deletesummary/{summaryId}")
 	public String deleteSummary(@PathVariable Integer summaryId) {
 		return monthlyAttendanceSummaryService.deleteSummary(summaryId);

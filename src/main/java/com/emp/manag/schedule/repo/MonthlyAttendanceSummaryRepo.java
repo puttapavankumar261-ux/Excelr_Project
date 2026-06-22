@@ -1,5 +1,6 @@
 package com.emp.manag.schedule.repo;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,5 +17,8 @@ public interface MonthlyAttendanceSummaryRepo
             Integer employeeId,
             Integer year,
             Integer month);
+    
+    List<MonthlyAttendanceSummaryEntity>
+    findByEmployeeEmployeeid(Integer employeeId);
 
 }

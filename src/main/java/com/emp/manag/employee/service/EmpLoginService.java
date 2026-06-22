@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.emp.manag.employee.entity.EmpEntity;
 import com.emp.manag.employee.entity.EmpLoginEntity;
@@ -27,6 +28,9 @@ public class EmpLoginService {
 
 	@Autowired
 	private EmpRepo empRepo;
+	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	public EmpLoginEntity saveLogin(EmpLoginEntity login) {
 
@@ -65,6 +69,10 @@ public class EmpLoginService {
 
 	    login.setEmployee(employee);
 
+	    login.setPasswordHash(
+	            passwordEncoder.encode(
+	                    login.getPasswordHash()));
+
 	    return loginRepo.save(login);
 	}
 
@@ -91,7 +99,9 @@ public class EmpLoginService {
 
 		existingLogin.setEmployee(employee);
 		existingLogin.setUsername(updatedLogin.getUsername());
-		existingLogin.setPasswordHash(updatedLogin.getPasswordHash());
+		existingLogin.setPasswordHash(
+		        passwordEncoder.encode(
+		                updatedLogin.getPasswordHash()));
 		existingLogin.setRole(updatedLogin.getRole());
 		existingLogin.setStatus(updatedLogin.getStatus());
 		existingLogin.setPasswordResetToken(updatedLogin.getPasswordResetToken());
@@ -152,6 +162,13 @@ public class EmpLoginService {
 		if (!"ACTIVE".equalsIgnoreCase(login.getStatus())) {
 			throw new RuntimeException("Employee login is not active");
 		}
+		System.out.println("Login Username : " + request.getUsername());
+
+		System.out.println(
+		        "Password Match : "
+		        + passwordEncoder.matches(
+		                request.getPassword(),
+		                login.getPasswordHash()));
 		if (!matchesPassword(request.getPassword(), login.getPasswordHash())) {
 			throw new RuntimeException("Invalid username or password");
 		}
@@ -208,11 +225,17 @@ public class EmpLoginService {
 	            .orElseThrow(() ->
 	                    new RuntimeException("User not found"));
 
-	    if (!login.getPasswordHash().equals(currentPassword)) {
-	        throw new RuntimeException("Current password is incorrect");
+	    if (!passwordEncoder.matches(
+	            currentPassword,
+	            login.getPasswordHash())) {
+
+	        throw new RuntimeException(
+	                "Current password is incorrect");
 	    }
 
-	    login.setPasswordHash(newPassword);
+	    login.setPasswordHash(
+	            passwordEncoder.encode(
+	                    newPassword));
 
 	    login.setFirstLogin(false);
 
@@ -244,8 +267,13 @@ public class EmpLoginService {
 		}
 	}
 
-	private boolean matchesPassword(String rawPassword, String storedPasswordHash) {
-		return storedPasswordHash != null && storedPasswordHash.equals(rawPassword);
+	private boolean matchesPassword(
+	        String rawPassword,
+	        String storedPasswordHash) {
+
+	    return passwordEncoder.matches(
+	            rawPassword,
+	            storedPasswordHash);
 	}
 
 	private SessionResponse buildSessionResponse(HttpSession session,
