@@ -140,3 +140,14 @@ export const getAttendanceSummary = async (
     `/attendance-summary/${employeeId}`
   );
 };
+
+/* ASSIGN SHIFT */
+
+export const assignShift = async (
+  employeeId,
+  shiftId
+) => {
+  return await axiosClient.put(
+    `/assignshift/${employeeId}/${shiftId}`
+  );
+};

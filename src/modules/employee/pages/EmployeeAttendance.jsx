@@ -14,6 +14,8 @@ function EmployeeAttendance() {
 
   const [todayAttendance, setTodayAttendance] = useState(null);
 
+  const [attendanceHistory, setAttendanceHistory] = useState([]);
+
   const [shift, setShift] = useState(null);
 
   const [employeeId, setEmployeeId] = useState(null);
@@ -30,6 +32,8 @@ function EmployeeAttendance() {
     loadTodayAttendance(empId);
 
     loadEmployeeShift(empId);
+
+    loadAttendanceHistory(empId);
   }, []);
 
   const loadAttendanceSummary = async (empId) => {
@@ -62,6 +66,16 @@ function EmployeeAttendance() {
     }
   };
 
+  const loadAttendanceHistory = async (empId) => {
+    try {
+      const response = await axiosClient.get(`/attendance/history/${empId}`);
+
+      setAttendanceHistory(response.data || []);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   const handleCheckIn = async () => {
     try {
       await checkIn(employeeId);
@@ -71,6 +85,8 @@ function EmployeeAttendance() {
       await loadTodayAttendance(employeeId);
 
       await loadAttendanceSummary(employeeId);
+
+      await loadAttendanceHistory(employeeId);
     } catch (error) {
       alert(error.response?.data?.message || "Check In Failed");
     }
@@ -85,6 +101,8 @@ function EmployeeAttendance() {
       await loadTodayAttendance(employeeId);
 
       await loadAttendanceSummary(employeeId);
+
+      await loadAttendanceHistory(employeeId);
     } catch (error) {
       alert(error.response?.data?.message || "Check Out Failed");
     }
@@ -117,19 +135,19 @@ function EmployeeAttendance() {
               </div>
 
               <div className="col-md-2">
-                <strong>Start Time</strong>
+                <strong>Start</strong>
                 <br />
                 {shift.startTime}
               </div>
 
               <div className="col-md-2">
-                <strong>End Time</strong>
+                <strong>End</strong>
                 <br />
                 {shift.endTime}
               </div>
 
               <div className="col-md-2">
-                <strong>Grace Time</strong>
+                <strong>Grace</strong>
                 <br />
                 {shift.lateGraceMinutes} Min
               </div>
@@ -184,7 +202,7 @@ function EmployeeAttendance() {
           <button
             className="btn btn-success me-2"
             onClick={handleCheckIn}
-            disabled={todayAttendance?.punchInTime}
+            disabled={!!todayAttendance?.punchInTime}
           >
             Check In
           </button>
@@ -193,7 +211,7 @@ function EmployeeAttendance() {
             className="btn btn-danger"
             onClick={handleCheckOut}
             disabled={
-              !todayAttendance?.punchInTime || todayAttendance?.punchOutTime
+              !todayAttendance?.punchInTime || !!todayAttendance?.punchOutTime
             }
           >
             Check Out
@@ -206,46 +224,118 @@ function EmployeeAttendance() {
       {summary && (
         <div className="row">
           <div className="col-md-3">
-            <div className="card shadow-sm border-success">
+            <div className="card border-success shadow-sm">
               <div className="card-body text-center">
                 <h6>Working Days</h6>
-
                 <h2>{summary.workingDays}</h2>
               </div>
             </div>
           </div>
 
           <div className="col-md-3">
-            <div className="card shadow-sm border-primary">
+            <div className="card border-primary shadow-sm">
               <div className="card-body text-center">
                 <h6>Present Days</h6>
-
                 <h2>{summary.presentDays}</h2>
               </div>
             </div>
           </div>
 
           <div className="col-md-3">
-            <div className="card shadow-sm border-warning">
+            <div className="card border-warning shadow-sm">
               <div className="card-body text-center">
                 <h6>Leave Days</h6>
-
                 <h2>{summary.leaveDays}</h2>
               </div>
             </div>
           </div>
 
           <div className="col-md-3">
-            <div className="card shadow-sm border-info">
+            <div className="card border-info shadow-sm">
               <div className="card-body text-center">
                 <h6>Attendance %</h6>
-
                 <h2>{summary.attendancePercentage}%</h2>
               </div>
             </div>
           </div>
         </div>
       )}
+
+      {/* Attendance History */}
+
+      <div className="card shadow-sm mt-4">
+        <div className="card-header bg-dark text-white">Attendance History</div>
+
+        <div className="card-body p-0">
+          <table className="table table-bordered table-hover mb-0">
+            <thead className="table-light">
+              <tr>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Punch In</th>
+                <th>Punch Out</th>
+                <th>Work Minutes</th>
+                <th>Late By</th>
+                <th>Overtime</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {attendanceHistory.length > 0 ? (
+                attendanceHistory.map((attendance) => (
+                  <tr key={attendance.attendanceId}>
+                    <td>{attendance.attendanceDate}</td>
+
+                    <td>
+                      {attendance.attendanceStatus === "PRESENT" && (
+                        <span className="badge bg-success">PRESENT</span>
+                      )}
+
+                      {attendance.attendanceStatus === "HALF_DAY" && (
+                        <span className="badge bg-warning text-dark">
+                          HALF DAY
+                        </span>
+                      )}
+
+                      {attendance.attendanceStatus === "ABSENT" && (
+                        <span className="badge bg-danger">ABSENT</span>
+                      )}
+
+                      {attendance.attendanceStatus === "LEAVE" && (
+                        <span className="badge bg-info">LEAVE</span>
+                      )}
+
+                      {attendance.attendanceStatus === "HOLIDAY" && (
+                        <span className="badge bg-primary">HOLIDAY</span>
+                      )}
+
+                      {attendance.attendanceStatus === "WEEK_OFF" && (
+                        <span className="badge bg-secondary">WEEK OFF</span>
+                      )}
+                    </td>
+
+                    <td>{attendance.punchInTime || "-"}</td>
+
+                    <td>{attendance.punchOutTime || "-"}</td>
+
+                    <td>{attendance.totalWorkMinutes || 0}</td>
+
+                    <td>{attendance.lateByMinutes || 0}</td>
+
+                    <td>{attendance.overtimeMinutes || 0}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="text-center">
+                    No Attendance Records Found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
